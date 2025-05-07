@@ -1,31 +1,108 @@
 "use strict"
 
-const Comment = require('../models/Comment');
-const Post = require("../models/Post");
+// const Comment = require('../models/Comment');
+// const Post = require("../models/Post");
+
+const output = {
+    mypage: (req, res) => {
+        res.render('home/mypage.html');
+    },
+    modifyNickname: (req, res) => {
+        res.render('home/modifyNickname.html');
+    },
+    withdrawal: (req, res) => {
+        res.render('home/withdrawal.html');
+    },
+    modifyPsword: (req, res) => {
+        res.render('home/modifyPsword.html');
+    },
+    agreement: (req, res) => {
+        res.render('home/agreement.html');
+    },
+    contact:(req,res)=>{
+        res.render('home/contact.html');
+    },
+    myCommunityPost: (req, res) => {
+        res.render('post/communityPost.html')
+    },
+    forgotPassword:(req,res)=>{
+        res.render('home/forgotPassword.html');
+    },
+    uploadComment: (req, res) => {
+        res.render('post/postviewer.html');
+    },
+    showCommentListbyPostID: (req, res) => {
+        res.render('post/postviewer.html');
+    },
+}
+    const process = {
+        //로그아웃
+        logout: (req, res, next) => {
+            try {
+                req.logout(function (err) {
+                    if (err) { return next(err); }
+                    res.redirect('/');
+                });
+            } catch (err) {
+                return res.json({
+                    "status": 500,
+                    "err": err
+                });
+            };
+        },
+        //닉네임 변경
+    modifyNickname: async (req, res) => {
+        const user = new User({
+            user_email: req.body.user_email,
+            user_nickname: req.body.user_nickname,
+        });
+        const response = await user.modifyNickname();
+        return res.json(response)
+
+    },
+    //비밀번호 변경1(마이페이지-현재 비밀번호를 아는 상태로 비밀번호 변경)
+    modifyPsword1: async (req, res) => {
+        const hashedPassword = await bcrypt.hash(req.body.new_psword, 10)
+        const user = new User({
+            user_email: req.body.user_email,
+            new_psword: hashedPassword,
+            psword: req.body.psword
+        });
+        const response = await user.modifyPsword1();
+        return res.json(response)
+    },
+    //비밀번호 변경2(이메일을 이용한 비밀번호 변경)
+    modifyPsword2: async (req, res) => {
+        const hashedPassword = await bcrypt.hash(req.body.new_psword, 10)
+        const user = new User({
+            user_email: req.body.user_email,
+            new_psword: hashedPassword
+        });
+        const response = await user.modifyPsword2();
+        return res.json(response)
+    },
+    //회원탈퇴 
+    withdrawal: async (req, res) => {
+
+        const user = new User({
+            user_email: req.body.user_email,
+            psword: req.body.psword,
+        });
+        const response = await user.withdrawalUser();
+
+        req.logout(function (err) {
+            if (err) { return next(err); }
+            return res.json(response)
+        });
+
+    },
+    //비밀번호 찾기
+    forgotPassword: async (req, res) => {
+
+    },
+}
 
 const post = {
-    //마이페이지) 
-    myCommunityPost: async (req, res) => {
-        const category = req.params.category;
-        if (category === '1') { //내 게시글 목록
-            const post = new Post(req.body);
-            const response = await post.myCommunityPost();
-            return res.json(response);
-        }
-        else if (category === '2') {//댓글 목록
-            const post = new Post(req.body);
-            const response = await post.myCommunityCommentPost();
-            return res.json(response);
-        } else if (category == '3') { //내 하트 게시글 목록
-            const post = new Post(req.body);
-            const response = await post.getUserHeartList();
-            return res.json(response);
-        } else if (category == '4') { //스크랩 목록
-            const post = new Post(req.body);
-            const response = await post.getUserScrapList();
-            return res.json(response);
-        }
-    },
     IncreaseViewCount: async (req, res) => {
         let post_id = req.params.post_id;
 
@@ -144,4 +221,4 @@ const comment = {
     }
 }
 
-module.exports = {post, comment};
+module.exports = { output, process, post};

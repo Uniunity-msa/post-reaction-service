@@ -2,10 +2,16 @@
 
 const express =require("express");
 const router = express.Router();
-const cors = require('cors');
 const ctrl = require("./home.ctrl");
 
-//
+router.get("/logout",ctrl.process.logout);
+router.get("/forgot/password",ctrl.output.forgotPassword);
+router.get("/mypage",ctrl.output.mypage);
+router.get("/mypage/modify/1",ctrl.output.modifyNickname);//닉네임변경
+router.get("/mypage/modify/2",ctrl.output.modifyPsword); //비밀번호변경
+router.get("/mypage/withdrawal",ctrl.output.withdrawal);//회원탈퇴
+router.get("/mypage/community/post/:category",ctrl.output.myCommunityPost);
+router.get("/contact",ctrl.output.contact);
 router.post("/mypage/community/post/:category",ctrl.post.myCommunityPost);
 //게시글 조회수 증가
 router.get('/increaseViewCount/:post_id', ctrl.post.IncreaseViewCount);
@@ -33,5 +39,6 @@ router.delete('/doDeleteComment/:post_id/:user_email/:comment_id', ctrl.comment.
 router.get("/postCommentNum/:post_id",ctrl.comment.postCommentNum);
 //댓글 작성자 받아오기
 router.get("/getCommentWriter/:comment_id",ctrl.comment.commentWriter);
+
 
 module.exports=router;
