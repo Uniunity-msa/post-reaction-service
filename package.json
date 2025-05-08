@@ -1,0 +1,27 @@
+{
+  "name": "post-reaction-service",
+  "version": "1.0.0",
+  "description": "post-reaction-service microservice 레포지토리입니다.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "start": "node index.js",
+    "type": "git",
+    "url": "git+https://github.com/Uniunity-msa/post-reaction-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Uniunity-msa/post-reaction-service/issues"
+  },
+  "homepage": "https://github.com/Uniunity-msa/post-reaction-service#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1"
+  }
+}

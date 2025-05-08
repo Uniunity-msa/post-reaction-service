@@ -1,6 +1,5 @@
 "use strict"
-// const { reject } = require("underscore");
-const { pool } = require("../../config/db");
+const { pool } = require("../config/db");
 
 class PostReactionStorage {
     //댓글 작성
@@ -43,11 +42,11 @@ class PostReactionStorage {
             });
         });
     }
-    //게시글 댓글 수 증가
+    //게시글 댓글 수 증가 
     static updatePostCommentCount(post_id){
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
-                if (err) {
+                if (err) { 
                     console.error('MySQL 연결 오류: ', err);
                     reject(err);
                     return;
@@ -321,7 +320,6 @@ class PostReactionStorage {
                     console.error('MySQL 연결 오류: ', err);
                     reject(err)
                 }
-
                 pool.query("SELECT * FROM Post WHERE post_id IN (SELECT post_id FROM Comment WHERE user_email =?) ORDER BY post_id DESC;"
                     , [user_email], function (err, rows) {
                         pool.releaseConnection(connection);
@@ -338,115 +336,66 @@ class PostReactionStorage {
             })
         });
     }
-    //조회수 증가
-    static getIncreaseViewCount(post_id) {
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err, connection) => {
+   
+// 하트 기능 
+// 통신 필요, 추후 수정(현재는 오류)
+// 마이페이지) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
+static addHeart(heartInfo) {
+    const post_id = heartInfo.post_id;
+    const user_email = heartInfo.user_email;
+    return new Promise(async (resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.error('MySQL 연결 오류: ', err);
+                reject(err)
+            }
+            // 해당 게시글이 존재하는지 확인
+            pool.query("SELECT * FROM Post WHERE post_id=?;", [post_id], function (err, posts) {
                 if (err) {
-                    console.error('MySQL 연결 오류: ', err);
-                    reject({
-                        result: false,
-                        status: 500,
-                        err: `${err}`
-                    });
-                }
-
-                const query = 'UPDATE Post SET view_count = view_count + 1 WHERE post_id = ?';
-                pool.query(query, [post_id], (err, result) => {
-                    pool.releaseConnection(connection);
-                    if (err) {
-                        reject({
-                            result: false,
-                            status: 500,
-                            err: `${err}`
-                        });
-                    } else {
-                        if (result.affectedRows > 0) {
-                            resolve({
-                                result: true,
-                                status: 200
-
-                            });
-                        } else {
-                            reject({
-                                result: false,
-                                status: 404,
-                                err: '게시글을 찾을 수 없습니다.'
-                            });
-                        }
-                    }
-                });
-            });
-        });
-    }
-    // 하트 기능 //
-    // 마이페이지) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
-    static addHeart(heartInfo) {
-        const post_id = heartInfo.post_id;
-        const user_email = heartInfo.user_email;
-        return new Promise(async (resolve, reject) => {
-            pool.getConnection((err, connection) => {
-                if (err) {
-                    console.error('MySQL 연결 오류: ', err);
+                    console.error('Query 함수 오류', err);
                     reject(err)
                 }
-                // 해당 게시글이 존재하는지 확인
-                pool.query("SELECT * FROM Post WHERE post_id=?;", [post_id], function (err, posts) {
-                    if (err) {
-                        console.error('Query 함수 오류', err);
-                        reject(err)
-                    }
-                    else if (posts.length < 1) {
-                        pool.releaseConnection(connection);
-                        resolve({ result: "Post does not exist.", status: 202 });
-                    }
-                    else {
-                        // 해당 사용자가 존재하는지 확인
-                        pool.query("SELECT * FROM User WHERE user_email=?", [user_email], function (err, users) {
-                            if (err) {
-                                console.error('Query 함수 오류', err);
-                                reject(err)
-                            }
-                            else if (users.length < 1) {
-                                pool.releaseConnection(connection);
-                                resolve({ result: "User does not exist.", status: 202 });
-                            }
-                            else {
-                                // 게시글이 존재하고 사용자가 존재할 때 하트 추가 가능
-                                pool.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?;", [post_id, user_email], function (err, check) {
+                else if (posts.length < 1) {
+                    pool.releaseConnection(connection);
+                    resolve({ result: "Post does not exist.", status: 202 });
+                }
+                else {
+                    // 게시글이 존재할 때 하트 추가 가능
+                    pool.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?;", [post_id, user_email], function (err, check) {
+                        if (err) {
+                            console.error('Query 함수 오류', err);
+                            reject(err)
+                        }
+                        else if (check.length > 0) {
+                            pool.releaseConnection(connection);
+                            resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
+                        }
+                        else {
+                            pool.query("INSERT INTO Heart(post_id, user_email) values(?,?);", [post_id, user_email], function (err, rows) {
+                                if (err) {
+                                    console.error('Query 함수 오류', err);
+                                    reject(err)
+                                }
+                                // 해당 게시글 like_count 증가(추후수정,post table 없기때문에 에러)
+                                /*
+                                pool.query("UPDATE Post SET like_count=like_count+1 WHERE post_id=?;", [post_id], function (err) {
+                                    pool.releaseConnection(connection);
                                     if (err) {
                                         console.error('Query 함수 오류', err);
                                         reject(err)
                                     }
-                                    else if (check.length > 0) {
-                                        pool.releaseConnection(connection);
-                                        resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
-                                    }
-                                    else {
-                                        pool.query("INSERT INTO Heart(post_id, user_email) values(?,?);", [post_id, user_email], function (err, rows) {
-                                            if (err) {
-                                                console.error('Query 함수 오류', err);
-                                                reject(err)
-                                            }
-                                            // 해당 게시글 like_count 증가
-                                            pool.query("UPDATE Post SET like_count=like_count+1 WHERE post_id=?;", [post_id], function (err) {
-                                                pool.releaseConnection(connection);
-                                                if (err) {
-                                                    console.error('Query 함수 오류', err);
-                                                    reject(err)
-                                                }
-                                            })
-                                            resolve({ result: rows, status: 200 });
-                                        })
-                                    }
                                 })
-                            }
-                        })
-                    }
-                })
+                                resolve({ result: rows, status: 200 });
+                                */
+                            })
+                        }
+                    })
+                }
             })
-        });
-    }
+        })
+    });
+}
+
     // 마이페이지) user_email에 해당하는 사용자의 하트 목록 보여주기
     static getUserHeartList(userInfo) {
         const user_email = userInfo.user_email;
@@ -724,3 +673,5 @@ class PostReactionStorage {
         });
     }
 }
+
+module.exports = PostReactionStorage;
