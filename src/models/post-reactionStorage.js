@@ -361,7 +361,7 @@ static async addHeart(heartInfo) {
 // 게시글 존재하는지 확인
 static async validPostId(post_id) {
     try {
-        const response = await axios.get(`http://${host}:3000/showPost/${post_id}`);
+        const response = await axios.get(`http://${this.host}:3000/showPost/${post_id}`);
         // 존재하면 200 OK, 데이터 포함
         return true;
     } catch (error) {
@@ -383,8 +383,8 @@ static async validUser() {
 // TODO : url 수정
 static async likeNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${host}:3000/increaseHeart/${post_id}`
-        : `http://${host}:3000/decreaseHeart/${post_id}`;
+        ? `http://${this.host}:3000/increaseHeart/${post_id}`
+        : `http://${this.host}:3000/decreaseHeart/${post_id}`;
 
     try {
         const response = await axios.patch(url);
@@ -399,8 +399,8 @@ static async likeNumControl({ post_id, isIncrease }) {
 // TODO : url 수정
 static async scrapNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${host}:3000/increaseScrap/${post_id}`
-        : `http://${host}:3000/decreaseScrap/${post_id}`;
+        ? `http://${this.host}:3000/increaseScrap/${post_id}`
+        : `http://${this.host}:3000/decreaseScrap/${post_id}`;
 
     try {
         const response = await axios.patch(url);
@@ -414,8 +414,8 @@ static async scrapNumControl({ post_id, isIncrease }) {
 // 게시글 댓글 수 증가 및 감소 
 async commentNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${host}:3000/increaseComment/${post_id}`
-        : `http://${host}:3000/decreaseComment/${post_id}`;
+        ? `http://${this.host}:3000/increaseComment/${post_id}`
+        : `http://${this.host}:3000/decreaseComment/${post_id}`;
 
     try {
         const response = await axios.patch(url);
