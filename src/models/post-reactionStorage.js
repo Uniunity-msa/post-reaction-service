@@ -48,7 +48,7 @@ class PostReactionStorage {
         });
     }
 
-    
+
     //comment_id로 댓글 불러오기
     static getComment(comment_id) { //(4)
         return new Promise(async (resolve, reject) => {
@@ -374,6 +374,9 @@ async validPostId(post_id) {
 }
 
 // 사용자 존재하는지 확인
+async validUser() {
+    return true;
+}
 
 
 // 좋아요 수 증가 및 감소
