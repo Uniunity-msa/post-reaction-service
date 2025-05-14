@@ -6,7 +6,7 @@ const amqp = require('amqplib');
 
 class PostReactionStorage {
 
-    static host = "34.64.55.111";
+    static host = "34.47.84.123";
     //댓글 작성
     static saveComment(commentInfo) {
         return new Promise((resolve, reject) => {
@@ -299,7 +299,7 @@ class PostReactionStorage {
 // 하트 기능 
 // 통신 필요, 추후 수정(현재는 오류)
 // 좋아요) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
-static addHeart(heartInfo) {
+static async addHeart(heartInfo) {
     const post_id = heartInfo.post_id;
     const user_email = heartInfo.user_email;
 
@@ -359,7 +359,7 @@ static addHeart(heartInfo) {
 }
 
 // 게시글 존재하는지 확인
-async validPostId(post_id) {
+static async validPostId(post_id) {
     try {
         const response = await axios.get(`http://${host}:3000/showPost/${post_id}`);
         // 존재하면 200 OK, 데이터 포함
@@ -374,14 +374,14 @@ async validPostId(post_id) {
 }
 
 // 사용자 존재하는지 확인
-async validUser() {
+static async validUser() {
     return true;
 }
 
 
 // 좋아요 수 증가 및 감소
 // TODO : url 수정
-async likeNumControl({ post_id, isIncrease }) {
+static async likeNumControl({ post_id, isIncrease }) {
     const url = isIncrease
         ? `http://${host}:3000/increaseHeart/${post_id}`
         : `http://${host}:3000/decreaseHeart/${post_id}`;
@@ -397,7 +397,7 @@ async likeNumControl({ post_id, isIncrease }) {
 
 // 게시글 스크랩 수 증가 및 감소 
 // TODO : url 수정
-async scrapNumControl({ post_id, isIncrease }) {
+static async scrapNumControl({ post_id, isIncrease }) {
     const url = isIncrease
         ? `http://${host}:3000/increaseScrap/${post_id}`
         : `http://${host}:3000/decreaseScrap/${post_id}`;
