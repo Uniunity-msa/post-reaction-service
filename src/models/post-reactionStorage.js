@@ -1,7 +1,12 @@
 "use strict"
 const { pool } = require("../config/db");
+const axios = require('axios');
+const amqp = require('amqplib');
+
 
 class PostReactionStorage {
+
+    static host = "34.64.55.111";
     //댓글 작성
     static saveComment(commentInfo) {
         return new Promise((resolve, reject) => {
@@ -42,55 +47,8 @@ class PostReactionStorage {
             });
         });
     }
-    //게시글 댓글 수 증가 
-    static updatePostCommentCount(post_id){
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err, connection) => {
-                if (err) { 
-                    console.error('MySQL 연결 오류: ', err);
-                    reject(err);
-                    return;
-                }
 
-                const query = 'UPDATE Post SET comment_count = comment_count + 1 WHERE post_id = ?';
-
-                connection.query(query, [ post_id], (err) => {
-                    if (err) {
-                        pool.releaseConnection(connection);
-                        console.error('INSERT Query 함수 오류', err);
-                        reject({ result:false, err: `${err}` });
-
-                    }
-                    else resolve({ result:true});
-                });
-            });
-        });
-    }
-    //게시글 댓글 수 감소
-    static reducePostCommentCount(post_id){
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err, connection) => {
-                if (err) {
-                    console.error('MySQL 연결 오류: ', err);
-                    reject(err);
-                    return;
-                }
-
-                const query = 'UPDATE Post SET comment_count = comment_count - 1 WHERE post_id = ?';
-
-                connection.query(query, [ post_id], (err) => {
-                    if (err) {
-                        pool.releaseConnection(connection);
-                        console.error('INSERT Query 함수 오류', err);
-                        reject({ result:false, err: `${err}` });
-
-                    }
-                    else resolve({ result:true});
-                });
-            });
-        });
-
-    }
+    
     //comment_id로 댓글 불러오기
     static getComment(comment_id) { //(4)
         return new Promise(async (resolve, reject) => {
@@ -152,7 +110,8 @@ class PostReactionStorage {
             });
         });
     }
-    //댓글 삭제
+    //댓글 삭제 
+    //TODO : 게시글 댓글 수 업데이트 
     static goDeleteComment(user_email, comment_id) {
         return new Promise(async (resolve, reject) => {
             pool.getConnection((err, connection) => {
@@ -339,62 +298,131 @@ class PostReactionStorage {
    
 // 하트 기능 
 // 통신 필요, 추후 수정(현재는 오류)
-// 마이페이지) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
+// 좋아요) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
 static addHeart(heartInfo) {
     const post_id = heartInfo.post_id;
     const user_email = heartInfo.user_email;
+
     return new Promise(async (resolve, reject) => {
-        pool.getConnection((err, connection) => {
+        pool.getConnection(async (err, connection) => {
             if (err) {
                 console.error('MySQL 연결 오류: ', err);
-                reject(err)
+                return reject(err);
             }
-            // 해당 게시글이 존재하는지 확인
-            pool.query("SELECT * FROM Post WHERE post_id=?;", [post_id], function (err, posts) {
+
+            // 게시글 존재 여부 확인 (직접 통신)
+            try {
+                const isValid = await this.validPostId(post_id);
+                if (!isValid) {
+                    connection.release();
+                    return resolve({ result: "Post does not exist.", status: 202 });
+                }
+            } catch (error) {
+                connection.release();
+                return reject(error);
+            }
+
+            // 이미 하트를 눌렀는지 확인
+            pool.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?;", [post_id, user_email], async (err, check) => {
                 if (err) {
                     console.error('Query 함수 오류', err);
-                    reject(err)
+                    connection.release();
+                    return reject(err);
                 }
-                else if (posts.length < 1) {
-                    pool.releaseConnection(connection);
-                    resolve({ result: "Post does not exist.", status: 202 });
+
+                if (check.length > 0) {
+                    connection.release();
+                    return resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
                 }
-                else {
-                    // 게시글이 존재할 때 하트 추가 가능
-                    pool.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?;", [post_id, user_email], function (err, check) {
-                        if (err) {
-                            console.error('Query 함수 오류', err);
-                            reject(err)
-                        }
-                        else if (check.length > 0) {
-                            pool.releaseConnection(connection);
-                            resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
-                        }
-                        else {
-                            pool.query("INSERT INTO Heart(post_id, user_email) values(?,?);", [post_id, user_email], function (err, rows) {
-                                if (err) {
-                                    console.error('Query 함수 오류', err);
-                                    reject(err)
-                                }
-                                // 해당 게시글 like_count 증가(추후수정,post table 없기때문에 에러)
-                                /*
-                                pool.query("UPDATE Post SET like_count=like_count+1 WHERE post_id=?;", [post_id], function (err) {
-                                    pool.releaseConnection(connection);
-                                    if (err) {
-                                        console.error('Query 함수 오류', err);
-                                        reject(err)
-                                    }
-                                })
-                                resolve({ result: rows, status: 200 });
-                                */
-                            })
-                        }
-                    })
-                }
-            })
-        })
+
+                // 하트 추가
+                pool.query("INSERT INTO Heart(post_id, user_email) VALUES (?, ?);", [post_id, user_email], async (err, rows) => {
+                    if (err) {
+                        console.error('Query 함수 오류', err);
+                        connection.release();
+                        return reject(err);
+                    }
+
+                    // 좋아요 수 증가 요청 (직접 통신)
+                    try {
+                        await this.likeNumControl({ post_id, isIncrease: true });
+                    } catch (e) {
+                        console.error('좋아요 수 증가 요청 실패:', e.message);
+                    }
+
+                    connection.release();
+                    return resolve({ result: rows, status: 200 });
+                });
+            });
+        });
     });
 }
+
+// 게시글 존재하는지 확인
+async validPostId(post_id) {
+    try {
+        const response = await axios.get(`http://${host}:3000/showPost/${post_id}`);
+        // 존재하면 200 OK, 데이터 포함
+        return true;
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return false;
+        }
+        console.error('Post 확인 중 에러:', error.message);
+        throw error; // 예외 상황 (서버 다운 등)
+    }
+}
+
+// 사용자 존재하는지 확인
+
+
+// 좋아요 수 증가 및 감소
+// TODO : url 수정
+async likeNumControl({ post_id, isIncrease }) {
+    const url = isIncrease
+        ? `http://${host}:3000/increaseHeart/${post_id}`
+        : `http://${host}:3000/decreaseHeart/${post_id}`;
+
+    try {
+        const response = await axios.patch(url);
+        return response.data; 
+    } catch (error) {
+        console.error('좋아요 수 조절 실패:', error.message);
+        throw error;
+    }
+}
+
+// 게시글 스크랩 수 증가 및 감소 
+// TODO : url 수정
+async scrapNumControl({ post_id, isIncrease }) {
+    const url = isIncrease
+        ? `http://${host}:3000/increaseScrap/${post_id}`
+        : `http://${host}:3000/decreaseScrap/${post_id}`;
+
+    try {
+        const response = await axios.patch(url);
+        return response.data; 
+    } catch (error) {
+        console.error('스크랩 수 조절 실패:', error.message);
+        throw error;
+    }
+}
+
+// 게시글 댓글 수 증가 및 감소 
+async commentNumControl({ post_id, isIncrease }) {
+    const url = isIncrease
+        ? `http://${host}:3000/increaseComment/${post_id}`
+        : `http://${host}:3000/decreaseComment/${post_id}`;
+
+    try {
+        const response = await axios.patch(url);
+        return response.data; 
+    } catch (error) {
+        console.error('스크랩 수 조절 실패:', error.message);
+        throw error;
+    }
+}
+
 
     // 마이페이지) user_email에 해당하는 사용자의 하트 목록 보여주기
     static getUserHeartList(userInfo) {
@@ -445,42 +473,55 @@ static addHeart(heartInfo) {
             })
         });
     }
-    // 마이페이지) Heart 테이블에 정보 삭제
+    // 좋아요) Heart 테이블에 정보 삭제
     static deleteHeart(heart_id) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
                     console.error('MySQL 연결 오류: ', err);
-                    reject(err)
+                    return reject(err);
                 }
-                pool.query("SELECT * FROM Heart WHERE heart_id=?;", [heart_id], function (err, check) {
+    
+                // 먼저 해당 하트가 존재하는지 확인
+                pool.query("SELECT * FROM Heart WHERE heart_id=?;", [heart_id], async (err, check) => {
                     if (err) {
                         console.error('Query 함수 오류', err);
-                        reject(err)
+                        connection.release();
+                        return reject(err);
                     }
-                    else if (check.length < 1) {
-                        pool.releaseConnection(connection);
-                        resolve({ result: "This 'heart_id' does not exist in the 'Heart' table.", status: 202 });
+    
+                    if (check.length < 1) {
+                        connection.release();
+                        return resolve({ result: "This 'heart_id' does not exist in the 'Heart' table.", status: 202 });
                     }
-                    pool.query("DELETE FROM Heart WHERE heart_id=?;", [heart_id], function (err, rows) {
+    
+                    const post_id = check[0].post_id;
+    
+                    // 하트 삭제
+                    pool.query("DELETE FROM Heart WHERE heart_id=?;", [heart_id], async (err, rows) => {
                         if (err) {
                             console.error('Query 함수 오류', err);
-                            reject(err)
+                            connection.release();
+                            return reject(err);
                         }
-                        // 해당 게시글 like_count 감소
-                        pool.query("UPDATE Post SET like_count=like_count-1 WHERE post_id=?;", [check[0].post_id], function (err) {
-                            pool.releaseConnection(connection);
-                            if (err) {
-                                console.error('Query 함수 오류', err);
-                                reject(err)
-                            }
-                        })
-                        resolve({ result: rows, status: 200 });
-                    })
-                })
-            })
+    
+                        // 좋아요 수 감소 요청 (post-service와 직접 통신)
+                        try {
+                            await this.likeNumControl({ post_id, isIncrease: false });
+                        } catch (e) {
+                            console.error('좋아요 수 감소 실패:', e.message);
+                            // rollback 필요 시 여기에 INSERT 재처리 추가 가능
+                        }
+    
+                        connection.release();
+                        return resolve({ result: rows, status: 200 });
+                    });
+                });
+            });
         });
     }
+    
+    
     // 해당 게시글에 heart 개수 반환
     static postHeartNum(post_id) {
         return new Promise(async (resolve, reject) => {
@@ -500,74 +541,75 @@ static addHeart(heartInfo) {
             })
         });
     }
-    // 스크랩 기능 //
+    // 스크랩 기능
     // 마이페이지) (스크랩 버튼 클릭 시)Scrap 테이블에 정보 저장
-    static addScrap(scrapInfo) {
+    static async addScrap(scrapInfo) {
         const post_id = scrapInfo.post_id;
         const user_email = scrapInfo.user_email;
-        return new Promise(async (resolve, reject) => {
-            pool.getConnection((err, connection) => {
+    
+        return new Promise((resolve, reject) => {
+            pool.getConnection(async (err, connection) => {
                 if (err) {
                     console.error('MySQL 연결 오류: ', err);
-                    reject(err)
+                    return reject(err);
                 }
-                // 해당 게시글이 존재하는지 확인
-                pool.query("SELECT * FROM Post WHERE post_id=?;", [post_id], function (err, posts) {
+    
+                try {
+                    // 게시글 존재 여부 확인
+                    const postExists = await this.validPostId(post_id);
+                    if (!postExists) {
+                        connection.release();
+                        return resolve({ result: "Post does not exist.", status: 202 });
+                    }
+    
+                    // 사용자 존재 여부 확인
+                    const userExists = await this.validUser(user_email);
+                    if (!userExists) {
+                        connection.release();
+                        return resolve({ result: "User does not exist.", status: 202 });
+                    }
+                } catch (err) {
+                    connection.release();
+                    return reject(err);
+                }
+    
+                // 스크랩 중복 확인
+                pool.query("SELECT * FROM Scrap WHERE post_id=? AND user_email=?;", [post_id, user_email], (err, check) => {
                     if (err) {
                         console.error('Query 함수 오류', err);
-                        reject(err)
+                        connection.release();
+                        return reject(err);
                     }
-                    else if (posts.length < 1) {
-                        pool.releaseConnection(connection);
-                        resolve({ result: "Post does not exist.", status: 202 });
+    
+                    if (check.length > 0) {
+                        connection.release();
+                        return resolve({ result: "You have already clicked 'Scrap' on this post.", status: 202 });
                     }
-                    else {
-                        // 해당 사용자가 존재하는지 확인
-                        pool.query("SELECT * FROM User WHERE user_email=?", [user_email], function (err, users) {
-                            if (err) {
-                                console.error('Query 함수 오류', err);
-                                reject(err)
-                            }
-                            else if (users.length < 1) {
-                                pool.releaseConnection(connection);
-                                resolve({ result: "User does not exist.", status: 202 });
-                            }
-                            else {
-                                // 게시글이 존재하고 사용자가 존재할 때 스크랩 추가 가능
-                                pool.query("SELECT * FROM Scrap WHERE post_id=? AND user_email=?;", [post_id, user_email], function (err, check) {
-                                    if (err) {
-                                        console.error('Query 함수 오류', err);
-                                        reject(err)
-                                    }
-                                    else if (check.length > 0) {
-                                        pool.releaseConnection(connection);
-                                        resolve({ result: "You have already clicked 'Scrap' on this post.", status: 202 });
-                                    }
-                                    else {
-                                        pool.query("INSERT INTO Scrap(post_id, user_email) values(?,?);", [post_id, user_email], function (err, rows) {
-                                            if (err) {
-                                                console.error('Query 함수 오류', err);
-                                                reject(err)
-                                            }
-                                            // 해당 게시글 scrap_count 증가
-                                            pool.query("UPDATE Post SET scrap_count=scrap_count+1 WHERE post_id=?;", [post_id], function (err) {
-                                                pool.releaseConnection(connection);
-                                                if (err) {
-                                                    console.error('Query 함수 오류', err);
-                                                    reject(err)
-                                                }
-                                            })
-                                            resolve({ result: rows, status: 200 });
-                                        })
-                                    }
-                                })
-                            }
-                        })
-                    }
-                })
-            })
+    
+                    // Scrap 저장
+                    pool.query("INSERT INTO Scrap(post_id, user_email) VALUES(?, ?);", [post_id, user_email], async (err, rows) => {
+                        if (err) {
+                            console.error('Query 함수 오류', err);
+                            connection.release();
+                            return reject(err);
+                        }
+    
+                        // scrap_count 증가
+                        try {
+                            await this.scrapNumControl({ post_id, isIncrease: true });
+                        } catch (e) {
+                            console.error('스크랩 수 증가 실패:', e.message);
+                            // 필요 시 롤백 로직 추가 가능
+                        }
+    
+                        connection.release();
+                        return resolve({ result: rows, status: 200 });
+                    });
+                });
+            });
         });
     }
+    
      // 마이페이지) user_email에 해당하는 사용자의 스크랩 목록 보여주기
      static getUserScrapList(userInfo) {
         const user_email = userInfo.user_email;
@@ -618,7 +660,7 @@ static addHeart(heartInfo) {
         });
     }
     // 마이페이지) Scrap 테이블에 정보 삭제
-    static deleteScrap(scrap_id) {
+    static async deleteScrap(scrap_id) {
         return new Promise(async (resolve, reject) => {
             pool.getConnection((err, connection) => {
                 if (err) {
@@ -634,21 +676,23 @@ static addHeart(heartInfo) {
                         pool.releaseConnection(connection);
                         resolve({ result: "This 'scrap_id' does not exist in the 'Scrap' table.", status: 202 });
                     }
-                    pool.query("DELETE FROM Scrap WHERE scrap_id=?;", [scrap_id], function (err, rows) {
+                 
+                    pool.query("DELETE FROM Scrap WHERE scrap_id=?;", [scrap_id], async (err, rows) => {
                         if (err) {
                             console.error('Query 함수 오류', err);
-                            reject(err)
+                            connection.release();
+                            return reject(err);
                         }
-                         // 해당 게시글 scrap_count 감소
-                         pool.query("UPDATE Post SET scrap_count=scrap_count-1 WHERE post_id=?;", [check[0].post_id], function (err) {
-                            pool.releaseConnection(connection);
-                            if (err) {
-                                console.error('Query 함수 오류', err);
-                                reject(err)
-                            }
-                        })
-                        resolve({ result: rows, status: 200 });
-                    })
+    
+                        try {
+                            await this.scrapNumControl({ post_id, isIncrease: false });
+                        } catch (e) {
+                            console.error('스크랩 수 감소 실패:', e.message);
+                        }
+    
+                        connection.release();
+                        return resolve({ result: rows, status: 200 });
+                    });
                 })
             })
         });

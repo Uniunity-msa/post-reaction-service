@@ -4,15 +4,17 @@ const express =require("express");
 const router = express.Router();
 const postReactionController = require("../controllers/postReactionController")
 
-// 마이페이지 -> 하트
+// 좋아요
 router.post("/addHeart",postReactionController.addHeart); // 하트 목록 추가하기
-router.post("/checkHeart",postReactionController.checkHeart); // 특정 user_email 과 post_id에 해당하는 heart_id 확인
 router.get("/deleteHeart/:heart_id",postReactionController.deleteHeart); // 하트 목록 지우기
 
 // 마이페이지 -> 스크랩
 router.post("/addScrap",postReactionController.addScrap); // 스크랩 목록 추가하기
-router.post("/checkScrap",postReactionController.checkScrap); // 특정 user_email 과 post_id에 해당하는 scrap_id 확인
 router.get("/deleteScrap/:scrap_id",postReactionController.deleteScrap); // 스크랩 목록 지우기
+
+// 마이페이지
+router.post("/checkHeart",postReactionController.checkHeart); // 특정 user_email 과 post_id에 해당하는 heart_id 확인
+router.post("/checkScrap",postReactionController.checkScrap); // 특정 user_email 과 post_id에 해당하는 scrap_id 확인
 
 // 게시글 하트 개수 반환
 router.get("/postHeartNum/:post_id",postReactionController.postHeartNum);
