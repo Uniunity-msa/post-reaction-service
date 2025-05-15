@@ -2,7 +2,8 @@
 
 const express =require("express");
 const router = express.Router();
-const postReactionController = require("../controllers/postReactionController")
+const postReactionController = require("../controllers/postReactionController");
+
 
 // 좋아요
 router.post("/addHeart",postReactionController.addHeart); // 하트 목록 추가하기

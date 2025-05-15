@@ -3,19 +3,21 @@ const path = require("path");
 const postRouter = require("./src/routes/postReactionRoutes");
 const postReaction = require("./src/models/post-reactionModel");
 
+
 const app = express();
 const PORT = 3002;
 
 // RabbitMQ 연결 및 메시지 소비
-postReaction.connectToRabbitMQ()
-  .then(() => {
-    postReaction.consumeMessages();  // 메시지 소비 시작
-    console.log('✅ RabbitMQ 연결 및 메시지 소비 준비 완료');
-  })
-  .catch((err) => {
-    console.error("RabbitMQ 연결 실패:", err);
-    process.exit(1);  // 연결 실패 시 서버 종료
-  });
+(async () => {
+  try {
+      await postReaction.connectToRabbitMQ();
+      postReaction.consumeMessages();
+      console.log('✅ RabbitMQ 연결 및 메시지 소비 준비 완료');
+  } catch (err) {
+      console.error("RabbitMQ 연결 실패:", err);
+      process.exit(1);
+  }
+})();
 
 
 

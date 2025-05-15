@@ -1,5 +1,5 @@
 "use strict";
-const amqp = require('amqplib/callback_api');
+const amqp = require('amqplib');
 const PostReactionStorage = require("../models/post-reactionStorage");
 
 class PostReaction {
@@ -7,35 +7,22 @@ class PostReaction {
         this.body = body;
     }
 
-    // RabbitMQ 연결
-    connectToRabbitMQ() {
-        return new Promise((resolve, reject) => {
-            amqp.connect('amqp://127.0.0.1', (err, connection) => {
-                if (err) {
-                    console.error('RabbitMQ 연결 오류:', err);
-                    reject(err);
-                    return;
-                }
+    async connectToRabbitMQ() {
+        try {
+            const connection = await amqp.connect('amqp://127.0.0.1'); // 나중에 IP 바꾸기
+    
+            const channel = await connection.createChannel();
 
-                connection.createChannel((err, channel) => {
-                    if (err) {
-                        console.error('채널 생성 오류:', err);
-                        reject(err);
-                        return;
-                    }
-
-                    this.channel = channel;
-
-                    // 큐 선언
-                    this.channel.assertQueue('CommentRequestQueue', { durable: true });
-                    this.channel.assertQueue('HeartRequestQueue', { durable: true });
-                    this.channel.assertQueue('ScrapRequestQueue', { durable: true });
-
-                    console.log('RabbitMQ 연결 및 채널 생성 완료');
-                    resolve();  // 연결 및 채널 생성 후 resolve
-                });
-            });
-        });
+            await channel.assertQueue('CommentRequestQueue', { durable: true });
+            await channel.assertQueue('HeartRequestQueue', { durable: true });
+            await channel.assertQueue('ScrapRequestQueue', { durable: true });
+    
+            this.channel = channel;
+            console.log('✅ RabbitMQ 연결 및 채널 생성 완료');
+        } catch (err) {
+            console.error('❌ RabbitMQ 연결 실패:', err);
+            throw err;
+        }
     }
 
     // 큐에서 메시지 소비

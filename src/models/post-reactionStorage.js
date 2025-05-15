@@ -1,8 +1,7 @@
 "use strict"
 
-const {pool} = require("../config/db"); 
+const pool = require("../config/db"); 
 const axios = require('axios');
-const amqp = require('amqplib');
 
 class PostReactionStorage {
 
@@ -725,7 +724,7 @@ async commentNumControl({ post_id, isIncrease }) {
                 WHERE user_email = ?
             `;
 
-            db.query(query, [email], (err, results) => {
+            pool.query(query, [email], (err, results) => {
                 if (err) {
                     console.error('쿼리 실행 오류:', err);
                     return reject(err);
@@ -746,7 +745,7 @@ async commentNumControl({ post_id, isIncrease }) {
                 WHERE user_email = ?
             `;
 
-            db.query(query, [email], (err, results) => {
+            pool.query(query, [email], (err, results) => {
                 if (err) {
                     console.error('쿼리 실행 오류:', err);
                     return reject(err);
@@ -767,7 +766,7 @@ async commentNumControl({ post_id, isIncrease }) {
             WHERE user_email = ?
         `;
 
-        db.query(query, [email], (err, results) => {
+        pool.query(query, [email], (err, results) => {
             if (err) {
                 console.error('쿼리 실행 오류:', err);
                 return reject(err);
