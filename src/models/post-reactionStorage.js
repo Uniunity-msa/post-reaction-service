@@ -1,8 +1,8 @@
 "use strict"
-const { pool } = require("../config/db");
+
+const {pool} = require("../config/db"); 
 const axios = require('axios');
 const amqp = require('amqplib');
-
 
 class PostReactionStorage {
 
@@ -48,7 +48,7 @@ class PostReactionStorage {
         });
     }
 
-    
+
     //comment_id로 댓글 불러오기
     static getComment(comment_id) { //(4)
         return new Promise(async (resolve, reject) => {
@@ -422,8 +422,7 @@ async commentNumControl({ post_id, isIncrease }) {
         throw error;
     }
 }
-
-
+           
     // 마이페이지) user_email에 해당하는 사용자의 하트 목록 보여주기
     static getUserHeartList(userInfo) {
         const user_email = userInfo.user_email;
@@ -716,6 +715,68 @@ async commentNumControl({ post_id, isIncrease }) {
             })
         });
     }
+    static getPostIdsByEmailFromScrap(userEmail) {
+        return new Promise((resolve, reject) => {
+            const email = userEmail.email; 
+            // 이메일에 해당하는 post_id 조회 쿼리
+            const query = `
+                SELECT DISTINCT post_id
+                FROM Scrap
+                WHERE user_email = ?
+            `;
+
+            db.query(query, [email], (err, results) => {
+                if (err) {
+                    console.error('쿼리 실행 오류:', err);
+                    return reject(err);
+                }
+
+                // 결과 반환
+                resolve(results);
+            });
+        });
+    }
+    static getPostIdsByEmailFromHeart(userEmail) {
+        return new Promise((resolve, reject) => {
+            const email = userEmail.email; 
+            // 이메일에 해당하는 post_id 조회 쿼리
+            const query = `
+                SELECT DISTINCT post_id
+                FROM Heart
+                WHERE user_email = ?
+            `;
+
+            db.query(query, [email], (err, results) => {
+                if (err) {
+                    console.error('쿼리 실행 오류:', err);
+                    return reject(err);
+                }
+
+                // 결과 반환
+                resolve(results);
+            });
+        });
+    }
+    static getPostIdsByEmailFromComment(userEmail) {
+    return new Promise((resolve, reject) => {
+        const email = userEmail.email; 
+        // 이메일에 해당하는 post_id 조회 쿼리
+        const query = `
+            SELECT DISTINCT post_id
+            FROM Comment
+            WHERE user_email = ?
+        `;
+
+        db.query(query, [email], (err, results) => {
+            if (err) {
+                console.error('쿼리 실행 오류:', err);
+                return reject(err);
+            }
+            // 결과 반환
+            resolve(results);
+        });
+    });
+}
 }
 
 module.exports = PostReactionStorage;
