@@ -389,7 +389,7 @@ static async likeNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseHeart/${post_id}`;
 
     try {
-        const response = await axios.post(url);
+        const response = await axios.patch(url, {}); 
         return response.data; 
     } catch (error) {
         console.error('좋아요 수 조절 실패:', error.message);
@@ -405,7 +405,7 @@ static async scrapNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseScrap/${post_id}`;
 
     try {
-        const response = await axios.post(url);
+        const response = await axios.patch(url, {}); 
         return response.data; 
     } catch (error) {
         console.error('스크랩 수 조절 실패:', error.message);
@@ -420,10 +420,10 @@ async commentNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseComment/${post_id}`;
 
     try {
-        const response = await axios.post(url);
+        const response = await axios.patch(url, {}); 
         return response.data; 
     } catch (error) {
-        console.error('스크랩 수 조절 실패:', error.message);
+        console.error('댓글 수 조절 실패:', error.message);
         throw error;
     }
 }
