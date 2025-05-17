@@ -346,6 +346,7 @@ static async addHeart(heartInfo) {
                     // 좋아요 수 증가 요청 (직접 통신)
                     try {
                         await this.likeNumControl({ post_id, isIncrease: true });
+                        console.error('좋아요 수 증가 성공');
                     } catch (e) {
                         console.error('좋아요 수 증가 요청 실패:', e.message);
                     }
@@ -362,6 +363,7 @@ static async addHeart(heartInfo) {
 static async validPostId(post_id) {
     try {
         const response = await axios.get(`http://${this.host}:3000/showPost/${post_id}`);
+        console.log("post-service 통신 성공 - post 불러오기 성공: ",response);
         // 존재하면 200 OK, 데이터 포함
         return true;
     } catch (error) {
@@ -387,7 +389,7 @@ static async likeNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseHeart/${post_id}`;
 
     try {
-        const response = await axios.patch(url);
+        const response = await axios.post(url);
         return response.data; 
     } catch (error) {
         console.error('좋아요 수 조절 실패:', error.message);
@@ -403,7 +405,7 @@ static async scrapNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseScrap/${post_id}`;
 
     try {
-        const response = await axios.patch(url);
+        const response = await axios.post(url);
         return response.data; 
     } catch (error) {
         console.error('스크랩 수 조절 실패:', error.message);
@@ -418,7 +420,7 @@ async commentNumControl({ post_id, isIncrease }) {
         : `http://${this.host}:3000/decreaseComment/${post_id}`;
 
     try {
-        const response = await axios.patch(url);
+        const response = await axios.post(url);
         return response.data; 
     } catch (error) {
         console.error('스크랩 수 조절 실패:', error.message);
