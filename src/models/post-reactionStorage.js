@@ -382,30 +382,30 @@ static async validUser() {
 
 
 // 좋아요 수 증가 및 감소
-// TODO : url 수정
 static async likeNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${this.host}:3000/increaseHeart/${post_id}`
-        : `http://${this.host}:3000/decreaseHeart/${post_id}`;
+        ? `http://${this.host}:3000/increaseHeart`
+        : `http://${this.host}:3000/decreaseHeart`;
 
     try {
-        const response = await axios.patch(url, {}); 
+        const response = await axios.patch(url, { post_id }); 
         return response.data; 
     } catch (error) {
-        console.error('좋아요 수 조절 실패:', error.message);
+        console.error(`좋아요 수 ${isIncrease ? '증가' : '감소'} 실패:`, error.message);
         throw error;
     }
 }
+
 
 // 게시글 스크랩 수 증가 및 감소 
 // TODO : url 수정
 static async scrapNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${this.host}:3000/increaseScrap/${post_id}`
-        : `http://${this.host}:3000/decreaseScrap/${post_id}`;
+        ? `http://${this.host}:3000/increaseScrap`
+        : `http://${this.host}:3000/decreaseScrap`;
 
     try {
-        const response = await axios.patch(url, {}); 
+        const response = await axios.patch(url, { post_id }); 
         return response.data; 
     } catch (error) {
         console.error('스크랩 수 조절 실패:', error.message);
@@ -416,11 +416,11 @@ static async scrapNumControl({ post_id, isIncrease }) {
 // 게시글 댓글 수 증가 및 감소 
 async commentNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${this.host}:3000/increaseComment/${post_id}`
-        : `http://${this.host}:3000/decreaseComment/${post_id}`;
+        ? `http://${this.host}:3000/increaseComment`
+        : `http://${this.host}:3000/decreaseComment`;
 
     try {
-        const response = await axios.patch(url, {}); 
+        const response = await axios.patch(url, { post_id }); 
         return response.data; 
     } catch (error) {
         console.error('댓글 수 조절 실패:', error.message);
