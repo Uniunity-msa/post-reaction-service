@@ -1,5 +1,5 @@
 "use strict";
-
+const amqp = require('amqplib');
 const PostReactionStorage = require("../models/post-reactionStorage");
 
 class PostReaction {
@@ -7,7 +7,153 @@ class PostReaction {
         this.body = body;
     }
 
-    // 하트 기능 
+    async connectToRabbitMQ() {
+        try {
+            const connection = await amqp.connect('amqp://127.0.0.1'); // 나중에 IP 바꾸기
+    
+            const channel = await connection.createChannel();
+
+            await channel.assertQueue('CommentRequestQueue', { durable: true });
+            await channel.assertQueue('HeartRequestQueue', { durable: true });
+            await channel.assertQueue('ScrapRequestQueue', { durable: true });
+    
+            this.channel = channel;
+            console.log('✅ RabbitMQ 연결 및 채널 생성 완료');
+        } catch (err) {
+            console.error('❌ RabbitMQ 연결 실패:', err);
+            throw err;
+        }
+    }
+
+    // 큐에서 메시지 소비
+    consumeMessages() {
+
+        // 댓글큐
+        this.channel.consume('CommentRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getCommentPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);  // 처리 실패 시 재시도
+            }
+        });
+
+        // 좋아요큐
+        this.channel.consume('HeartRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getHeartPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);
+            }
+        });
+
+        // 스크랩큐
+        this.channel.consume('ScrapRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getScrapPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);
+            }
+        });
+    }
+
+
+    async connectToRabbitMQ() {
+        try {
+            const connection = await amqp.connect('amqp://127.0.0.1'); // 나중에 IP 바꾸기
+    
+            const channel = await connection.createChannel();
+
+            await channel.assertQueue('CommentRequestQueue', { durable: true });
+            await channel.assertQueue('HeartRequestQueue', { durable: true });
+            await channel.assertQueue('ScrapRequestQueue', { durable: true });
+    
+            this.channel = channel;
+            console.log('✅ RabbitMQ 연결 및 채널 생성 완료');
+        } catch (err) {
+            console.error('❌ RabbitMQ 연결 실패:', err);
+            throw err;
+        }
+    }
+
+    // 큐에서 메시지 소비
+    consumeMessages() {
+
+        // 댓글큐
+        this.channel.consume('CommentRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getCommentPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);  // 처리 실패 시 재시도
+            }
+        });
+
+        // 좋아요큐
+        this.channel.consume('HeartRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getHeartPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);
+            }
+        });
+
+        // 스크랩큐
+        this.channel.consume('ScrapRequestQueue', async (msg) => {
+            try {
+                const email = JSON.parse(msg.content.toString());
+                const result = await this.getScrapPostIdsByEmail(email);
+                this.channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(result)),
+                    { correlationId: msg.properties.correlationId }
+                );
+                this.channel.ack(msg);
+            } catch (err) {
+                console.error('메시지 처리 중 에러:', err);
+                this.channel.nack(msg, false, true);
+            }
+        });
+    }
+
     // 마이페이지) 하트 저장
     async addHeart(heartInfo) {
         try {
@@ -217,6 +363,47 @@ class PostReaction {
                 status: 500,
                 msg: err
             };
+        }
+    }
+
+      // 이메일로 post_id를 조회하는 함수
+      async getCommentPostIdsByEmail(email) {
+        try {
+            // comment 테이블에서 이메일에 해당하는 post_id 추출
+            const commentPosts = await PostReactionStorage.getPostIdsByEmailFromComment(email);
+            const postIds = commentPosts.map(row => row.post_id);
+            return postIds;
+        } catch (err) {
+            console.error('DB에서 comment post_id 조회 실패:', err);
+            throw new Error('DB 조회 실패');
+        }
+    }
+
+     // 이메일로 post_id를 조회하는 함수
+     async getScrapPostIdsByEmail(email) {
+        try {
+            // scrap 테이블에서 이메일에 해당하는 post_id 추출
+            const scrapPosts = await PostReactionStorage.getPostIdsByEmailFromScrap(email);
+            const postIds = scrapPosts.map(row => row.post_id);
+
+            return postIds;
+        } catch (err) {
+            console.error('DB에서 scrap post_id 조회 실패:', err);
+            throw new Error('DB 조회 실패');
+        }
+    }
+
+     // 이메일로 post_id를 조회하는 함수
+     async getHeartPostIdsByEmail(email) {
+        try {
+           // heart 테이블에서 이메일에 해당하는 post_id 추출
+            const heartPosts = await PostReactionStorage.getPostIdsByEmailFromHeart(email);
+            const postIds = heartPosts.map(row => row.post_id);
+
+            return postIds;
+        } catch (err) {
+            console.error('DB에서 heart post_id 조회 실패:', err);
+            throw new Error('DB 조회 실패');
         }
     }
 }

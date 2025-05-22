@@ -1,9 +1,25 @@
 const express = require("express");
 const path = require("path");
 const postRouter = require("./src/routes/postReactionRoutes");
+const PostReaction = require("./src/models/post-reactionModel");
+const postReaction = new PostReaction();
 
 const app = express();
 const PORT = 3002;
+
+// RabbitMQ 연결 및 메시지 소비
+(async () => {
+  try {
+      await postReaction.connectToRabbitMQ();
+      postReaction.consumeMessages();
+      console.log('✅ RabbitMQ 연결 및 메시지 소비 준비 완료');
+  } catch (err) {
+      console.error("RabbitMQ 연결 실패:", err);
+      process.exit(1);
+  }
+})();
+
+app.set("views", path.join(__dirname, "src/views"));  // 뷰 폴더 설정
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

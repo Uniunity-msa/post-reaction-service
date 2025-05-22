@@ -143,7 +143,15 @@ const postReactionController = {
             console.error('댓글 작성자 정보 조회 실패:', error);
             return res.status(500).json({ error: '댓글 작성자 정보 조회에 실패했습니다.' });
         }
-    }
+    },
+    
+    // 마이페이지 및 contact 화면 렌더링
+    mypage: (req, res) => {
+        res.render('home/mypage.html');
+    },
+    contact:(req,res)=>{
+        res.render('home/contact.html');
+    },
 }
 
 module.exports = postReactionController;
