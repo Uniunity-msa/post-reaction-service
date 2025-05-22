@@ -345,67 +345,69 @@ class PostReactionStorage {
         });
     }
    
-// 하트 기능 
-// 좋아요) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
-static async addHeart(heartInfo) {
-    const post_id = heartInfo.post_id;
-    const user_email = heartInfo.user_email;
-
-    return new Promise(async (resolve, reject) => {
-        pool.getConnection(async (err, connection) => {
-            if (err) {
-                console.error('MySQL 연결 오류: ', err);
-                return reject(err);
-            }
-
-            // 게시글 존재 여부 확인 (직접 통신)
-            try {
-                const isValid = await this.validPostId(post_id);
-                if (!isValid) {
-                    connection.release();
-                    return resolve({ result: "Post does not exist.", status: 202 });
-                }
-            } catch (error) {
-                connection.release();
-                return reject(error);
-            }
-
-            // 이미 하트를 눌렀는지 확인
-            pool.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?;", [post_id, user_email], async (err, check) => {
+    // 좋아요 기능
+    static async addHeart(heartInfo) {
+        const post_id = heartInfo.post_id;
+        const user_email = heartInfo.user_email;
+    
+        return new Promise(async (resolve, reject) => {
+            pool.getConnection(async (err, connection) => {
                 if (err) {
-                    console.error('Query 함수 오류', err);
-                    connection.release();
+                    console.error('MySQL 연결 오류: ', err);
                     return reject(err);
                 }
-
-                if (check.length > 0) {
-                    connection.release();
-                    return resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
-                }
-
-                // 하트 추가
-                pool.query("INSERT INTO Heart(post_id, user_email) VALUES (?, ?);", [post_id, user_email], async (err, rows) => {
-                    if (err) {
-                        console.error('Query 함수 오류', err);
+    
+                try {
+                    // 게시글 존재 여부 확인
+                    const isValid = await this.validPostId(post_id);
+                    if (!isValid) {
                         connection.release();
-                        return reject(err);
+                        return resolve({ result: "Post does not exist.", status: 202 });
                     }
-
-                    // 좋아요 수 증가 요청 (직접 통신)
-                    try {
-                        await this.likeNumControl({ post_id, isIncrease: true });
-                        console.error('좋아요 수 증가 성공');
-                    } catch (e) {
-                        console.error('좋아요 수 증가 요청 실패:', e.message);
+    
+                    // 유저 존재 여부 확인
+                    const isUserValid = await this.validUser(user_email);
+                    if (!isUserValid) {
+                        connection.release();
+                        return resolve({ result: "User does not exist.", status: 202 });
                     }
-
+    
+                    // 이미 하트 눌렀는지 확인
+                    connection.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?", [post_id, user_email], async (err, check) => {
+                        if (err) {
+                            connection.release();
+                            return reject(err);
+                        }
+    
+                        if (check.length > 0) {
+                            connection.release();
+                            return resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
+                        }
+    
+                        // 하트 추가
+                        connection.query("INSERT INTO Heart(post_id, user_email) VALUES (?, ?);", [post_id, user_email], async (err, rows) => {
+                            connection.release();
+    
+                            if (err) return reject(err);
+    
+                            try {
+                                await this.likeNumControl({ post_id, isIncrease: true });
+                                console.log('좋아요 수 증가 성공');
+                            } catch (e) {
+                                console.error('좋아요 수 증가 요청 실패:', e.message);
+                            }
+    
+                            return resolve({ result: rows, status: 200 });
+                        });
+                    });
+                } catch (error) {
                     connection.release();
-                    return resolve({ result: rows, status: 200 });
-                });
+                    return reject(error);
+                }
             });
         });
-    });
-}
+    }
+    
 
 // 게시글 존재하는지 확인
 static async validPostId(post_id) {
@@ -424,7 +426,11 @@ static async validPostId(post_id) {
 }
 
 // 사용자 존재하는지 확인
-static async validUser() {
+static async validUser(user_email) {
+    const exists = await axios.get(`http://${this.host}:3004/user/info?email=${user_email}`);
+    if (!exists.data.exists) {
+    throw new Error("유저가 존재하지 않습니다.");
+    }
     return true;
 }
 

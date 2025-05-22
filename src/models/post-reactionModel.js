@@ -78,25 +78,7 @@ class PostReaction {
                 this.channel.nack(msg, false, true);
             }
         });
-    }
 
-
-    async connectToRabbitMQ() {
-        try {
-            const connection = await amqp.connect('amqp://127.0.0.1'); // 나중에 IP 바꾸기
-    
-            const channel = await connection.createChannel();
-
-            await channel.assertQueue('CommentRequestQueue', { durable: true });
-            await channel.assertQueue('HeartRequestQueue', { durable: true });
-            await channel.assertQueue('ScrapRequestQueue', { durable: true });
-    
-            this.channel = channel;
-            console.log('✅ RabbitMQ 연결 및 채널 생성 완료');
-        } catch (err) {
-            console.error('❌ RabbitMQ 연결 실패:', err);
-            throw err;
-        }
     }
 
     // 큐에서 메시지 소비
@@ -194,7 +176,7 @@ class PostReaction {
             };
         }
     }
-    // 스크랩 기능 //
+    // 스크랩 기능 
     // 마이페이지) 스크랩 저장
     async addScrap(scrapInfo) {
         try {
