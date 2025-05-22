@@ -712,7 +712,7 @@ async commentNumControl({ post_id, isIncrease }) {
             })
         });
     }
-    // 마이페이지) Scrap 테이블에 정보 삭제
+    // 스크랩) Scrap 테이블에 정보 삭제
     static async deleteScrap(scrap_id) {
         return new Promise(async (resolve, reject) => {
             pool.getConnection((err, connection) => {
