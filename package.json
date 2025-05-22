@@ -4,10 +4,10 @@
   "description": "post-reaction-service microservice 레포지토리입니다.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "start": "node index.js",
     "type": "git",
     "url": "git+https://github.com/Uniunity-msa/post-reaction-service.git"
   },
@@ -28,3 +28,4 @@
     "mysql2": "^3.14.1"
   }
 }
+
