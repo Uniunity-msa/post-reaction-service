@@ -13,14 +13,14 @@ class PostReactionStorage {
             pool.getConnection((err, connection) => {
                 if (err) {
                     console.error('MySQL 연결 오류: ', err);
-                    reject(err);
-                    return;
+                    return reject(err);
                 }
+    
                 function getCurrentDateTime() {
                     const now = new Date();
-                    const offset = 9 * 60; // 9시간을 분 단위로 변환
-                    const localTime = now.getTime() + now.getTimezoneOffset() * 60 * 1000; // 로컬 시간을 밀리초 단위로 변환
-                    const seoulTime = new Date(localTime + offset * 60 * 1000); // 서울 시간 계산
+                    const offset = 9 * 60;
+                    const localTime = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+                    const seoulTime = new Date(localTime + offset * 60 * 1000);
                     const year = seoulTime.getFullYear();
                     const month = String(seoulTime.getMonth() + 1).padStart(2, '0');
                     const day = String(seoulTime.getDate()).padStart(2, '0');
@@ -29,25 +29,38 @@ class PostReactionStorage {
                     const seconds = String(seoulTime.getSeconds()).padStart(2, '0');
                     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
                 }
-                // 현재 시간을 YYYY-MM-DD HH:MM:SS 형식으로 포맷팅
+    
                 const formattedDateTime = getCurrentDateTime();
-            
-                const query = 'INSERT INTO Comment(user_email, post_id, comment_content, comment_date) VALUES ( ?, ?, ?, ?);';
-                // const updateQuery = 'UPDATE Post SET comment_count = comment_count + 1 WHERE post_id = ?';
-
-                connection.query(query, [ commentInfo.user_email, commentInfo.post_id, commentInfo.comment_content, formattedDateTime], (err) => {
-                    if (err) {
-                        pool.releaseConnection(connection);
-                        console.error('INSERT Query 함수 오류', err);
-                        reject({ result:false, status: 500, err: `${err}` });
-
+    
+                const insertQuery = 'INSERT INTO Comment(user_email, post_id, comment_content, comment_date) VALUES (?, ?, ?, ?)';
+    
+                connection.query(
+                    insertQuery,
+                    [commentInfo.user_email, commentInfo.post_id, commentInfo.comment_content, formattedDateTime],
+                    async (err) => {
+                        connection.release();
+    
+                        if (err) {
+                            console.error('INSERT Query 함수 오류', err);
+                            return reject({ result: false, status: 500, err: `${err}` });
+                        }
+    
+                        // 댓글 수 증가 (직접 통신)
+                        try {
+                            await this.commentNumControl({ post_id: commentInfo.post_id, isIncrease: true });
+                            console.log('댓글 수 증가 성공');
+                        } catch (e) {
+                            console.error('댓글 수 증가 실패:', e.message);
+                            // 댓글 저장은 되었으므로 상태는 207으로 반환
+                            return resolve({ result: true, status: 207, warning: '댓글 수 반영 실패' });
+                        }
+    
+                        return resolve({ result: true, status: 201 });
                     }
-                    else resolve({ result:true, status: 201 });
-                });
+                );
             });
         });
-    }
-
+    }    
 
     //comment_id로 댓글 불러오기
     static getComment(comment_id) { //(4)
@@ -110,43 +123,79 @@ class PostReactionStorage {
             });
         });
     }
-    //댓글 삭제 
-    //TODO : 게시글 댓글 수 업데이트 
-    static goDeleteComment(user_email, comment_id) {
-        return new Promise(async (resolve, reject) => {
-            pool.getConnection((err, connection) => {
+    static async goDeleteComment(user_email, comment_id) {
+        return new Promise((resolve, reject) => {
+            pool.getConnection(async (err, connection) => {
                 if (err) {
                     console.error('MySQL 연결 오류: ', err);
-                    reject(err);
+                    return reject(err);
                 }
-
-                const query = 'DELETE FROM Comment WHERE user_email = ? AND comment_id =?';
-                pool.query(query, [user_email, comment_id], (err, result) => {
-                    pool.releaseConnection(connection);
-                    if (err) {
-                        reject({
+    
+                try {
+                    // 1. 댓글 ID로 post_id 조회
+                    const getPostIdQuery = 'SELECT post_id FROM Comment WHERE comment_id = ? AND user_email = ?';
+                    const [rows] = await new Promise((res, rej) => {
+                        connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
+                            if (err) return rej(err);
+                            res(result);
+                        });
+                    });
+    
+                    if (!rows || rows.length === 0) {
+                        connection.release();
+                        return reject({
                             result: false,
-                            status: 500,
-                            err: `${err}`
+                            status: 404,
+                            err: '해당 댓글이 없거나 권한이 없습니다.'
+                        });
+                    }
+    
+                    const post_id = rows[0].post_id;
+    
+                    // 2. 댓글 삭제
+                    const deleteQuery = 'DELETE FROM Comment WHERE comment_id = ? AND user_email = ?';
+                    const deleteResult = await new Promise((res, rej) => {
+                        connection.query(deleteQuery, [comment_id, user_email], (err, result) => {
+                            if (err) return rej(err);
+                            res(result);
+                        });
+                    });
+    
+                    // 3. 연결 해제
+                    connection.release();
+    
+                    if (deleteResult.affectedRows > 0) {
+                        // 4. 댓글 수 감소 요청
+                        try {
+                            await this.commentNumControl({ post_id, isIncrease: false });
+                            console.log('댓글 수 감소 성공');
+                        } catch (e) {
+                            console.error('댓글 수 감소 요청 실패:', e.message);
+                        }
+    
+                        return resolve({
+                            result: true,
+                            status: 200
                         });
                     } else {
-                        if (result.affectedRows > 0) {
-                            resolve({
-                                result: true,
-                                status: 200
-                            });
-                        } else {
-                            reject({
-                                result: false,
-                                status: 404,
-                                err: '댓글을 찾을 수 없거나 삭제 권한이 없습니다.'
-                            });
-                        }
+                        return reject({
+                            result: false,
+                            status: 404,
+                            err: '댓글 삭제에 실패했습니다.'
+                        });
                     }
-                });
+                } catch (error) {
+                    connection.release();
+                    return reject({
+                        result: false,
+                        status: 500,
+                        err: error.message
+                    });
+                }
             });
         });
-    } 
+    }
+    
     //댓글 id로 댓글 작성자 불러오기
     static commentWriter(comment_id) {
         return new Promise((resolve, reject) => {
@@ -297,7 +346,6 @@ class PostReactionStorage {
     }
    
 // 하트 기능 
-// 통신 필요, 추후 수정(현재는 오류)
 // 좋아요) (하트 버튼 클릭 시)Heart 테이블에 정보 저장
 static async addHeart(heartInfo) {
     const post_id = heartInfo.post_id;

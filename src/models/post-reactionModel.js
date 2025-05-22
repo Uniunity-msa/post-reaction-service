@@ -7,7 +7,7 @@ class PostReaction {
         this.body = body;
     }
 
-    // 하트 기능 //
+    // 하트 기능 
     // 마이페이지) 하트 저장
     async addHeart(heartInfo) {
         try {
