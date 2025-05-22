@@ -9,7 +9,7 @@ class PostReaction {
 
     async connectToRabbitMQ() {
         try {
-            const connection = await amqp.connect('amqp://127.0.0.1'); // 나중에 IP 바꾸기
+            const connection = await amqp.connect('amqp://guest:guest@rabbit:5672'); // 나중에 IP 바꾸기
     
             const channel = await connection.createChannel();
 
