@@ -147,10 +147,10 @@ const postReactionController = {
     
     // 마이페이지 및 contact 화면 렌더링
     mypage: (req, res) => {
-        res.render('home/mypage.html');
+        res.sendFile(path.join(__dirname, "../views/home/mypage.html"));
     },
-    contact:(req,res)=>{
-        res.render('home/contact.html');
+    contact: (req, res) => {
+        res.sendFile(path.join(__dirname, "../views/home/contact.html"));
     },
 }
 

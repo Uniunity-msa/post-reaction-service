@@ -19,7 +19,17 @@ const PORT = 3002;
   }
 })();
 
-app.set("views", path.join(__dirname, "src/views"));  // 뷰 폴더 설정
+// 정적 파일 제공 (예: CSS, JS, 이미지 등)
+app.use(express.static(path.join(__dirname, "public"))); // 필요시 public 폴더 사용
+
+// /mypage 경로에서 정적 HTML 제공
+app.get("/mypage", (req, res) => {
+  res.sendFile(path.join(__dirname, "src/views/home/mypage.html"));
+});
+// /contact 경로에서 정적 HTML 제공
+app.get("/contact", (req, res) => {
+  res.sendFile(path.join(__dirname, "src/views/home/contact.html"));
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
