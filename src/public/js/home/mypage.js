@@ -29,15 +29,15 @@ const setLoginHeader = (res) => {
         // user_nickname.innerText = `${res.user_nickname}`
         // university_name.innerText = res.university_name
 
-        loginStatusBtn.setAttribute("href", `${apiUrl}/logout`); //user-service의 logout 화면 호출//
+        loginStatusBtn.setAttribute("href", `${userServiceUrl}/logout`); //user-service의 logout 화면 호출//
         loginStatusBtn.innerText = "로그아웃"
-        signUpBtn.setAttribute("href", `${apiUrl}/council/${res.university_url}`); //start-service의 메인 화면 호출//
+        signUpBtn.setAttribute("href", `${startServiceUrl}/council/${res.university_url}`); //start-service의 메인 화면 호출//
         signUpBtn.innerText = "나의학교"
     }
     else {
-        loginStatusBtn.setAttribute("href", `${apiUrl}/login`); //user-service의 login 화면 호출//
+        loginStatusBtn.setAttribute("href", `${userServiceUrl}/login`); //user-service의 login 화면 호출//
         loginStatusBtn.innerText = "로그인"
-        signUpBtn.setAttribute("href", `${apiUrl}/signup`); //user-service의 signup 화면 호출//
+        signUpBtn.setAttribute("href", `${userServiceUrl}/signup`); //user-service의 signup 화면 호출//
         signUpBtn.innerText = "회원가입"
     }
 }
@@ -55,25 +55,25 @@ const loadLinkData=()=>{
     const communityLink4= document.getElementById("community4_btn");
 
     nicknameLink.addEventListener("click", function () {
-        window.location.href = `${apiUrl}/mypage/modify/1`; //user-service의 닉네임변경 화면 호출//
+        window.location.href = `${userServiceUrl}/modify/nickname`; //user-service의 닉네임변경 화면 호출//
     });
     pswordLink.addEventListener("click", function () {
-        window.location.href = `${apiUrl}/mypage/modify/2`; //user-service의 비밀번호변경 화면 호출//
+        window.location.href = `${userServiceUrl}/modify/password`; //user-service의 비밀번호변경 화면 호출//
     });
     withdrawalLink.addEventListener("click", function () {
-        window.location.href = `${apiUrl}/mypage/withdrawal`; //user-service의 회원탈퇴 화면 호출//
+        window.location.href = `${userServiceUrl}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
-        window.location.href = "http://localhost:3000/mypage/community/post/1"; //post-service//
+        window.location.href = `${postServiceUrl}/mypage/community/post/1`; //post-service//
     });
     communityLink2.addEventListener("click", function () {
-        window.location.href = "http://localhost:3000/mypage/community/post/2"; //post-service//
+        window.location.href = `h${postServiceUrl}/mypage/community/post/2`; //post-service//
     });
     communityLink3.addEventListener("click", function () {
-        window.location.href = "http://localhost:3000/mypage/community/post/3"; //post-service//
+        window.location.href = `${postServiceUrl}/mypage/community/post/3`; //post-service//
     });
     communityLink4.addEventListener("click", function () {
-        window.location.href = "http://localhost:3000/mypage/community/post/4"; //post-service//
+        window.location.href = `${postServiceUrl}/mypage/community/post/4`; //post-service//
     });
 }
 
