@@ -20,7 +20,7 @@ const PORT = 3002;
 })();
 
 // 정적 파일 제공 (예: CSS, JS, 이미지 등)
-app.use(express.static(path.join(__dirname, "public"))); // 필요시 public 폴더 사용
+app.use(express.static(path.join(__dirname, 'src', 'public'))); // 필요시 public 폴더 사용
 
 // /mypage 경로에서 정적 HTML 제공
 app.get("/mypage", (req, res) => {
