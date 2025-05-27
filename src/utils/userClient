@@ -1,0 +1,15 @@
+const axios = require("axios");
+
+// user-service의 /auth/me에 직접 요청 보내는 함수
+async function fetchUserInfoFromUserService(cookies) {
+  const response = await axios.get("http://user-service:3004/auth/me", {
+    headers: {
+      Cookie: cookies // 클라이언트가 보낸 쿠키를 그대로 전달
+    },
+    withCredentials: true,
+  });
+
+  return response.data; // { user_id, university_id, ... }
+}
+
+module.exports = { fetchUserInfoFromUserService };

@@ -1,6 +1,7 @@
 "use strict";
 
 const PostReaction = require("../models/post-reactionModel");
+const { fetchUserInfoFromUserService } = require("../utils/userClient");
 
 const postReactionController = {
 
