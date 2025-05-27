@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const path = require("path");
 const postRouter = require("./src/routes/postReactionRoutes");
 const PostReaction = require("./src/models/post-reactionModel");
@@ -6,6 +7,8 @@ const postReaction = new PostReaction();
 
 const app = express();
 const PORT = 3002;
+
+app.use(cors());
 
 // RabbitMQ 연결 및 메시지 소비
 (async () => {
