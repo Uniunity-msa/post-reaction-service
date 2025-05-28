@@ -1,3 +1,5 @@
+const { userServiceUrl, postServiceUrl, startServiceUrl } = window.baseUrls;
+
 //로그인(로그아웃), 회원가입(마이페이지)버튼
 const loginStatusBtn = document.getElementById("loginStatusBtn");
 const signUpBtn = document.getElementById("signUpBtn");
@@ -13,6 +15,15 @@ const currentUrl = window.location.origin;
 const redirectUri = `${currentUrl}/mypage`; // 로그인/로그아웃 완료 후 돌아올 주소
 
 const loadloginData = async () => {
+    // setLoginHeader({
+    //     loginStatus: true,                 // 로그인 상태 true
+    //     user_email: "test@example.com",   // 임의 이메일
+    //     user_nickname: "tester",          // 임의 닉네임
+    //     user_type: "student",             // 임의 타입
+    //     user_name: "Test User",           // 임의 이름
+    //     university_name: "Test University",  // 임의 학교명
+    //     university_url: "test-university"     // 임의 학교 URL
+    //   });
     try {
         const url = `${userServiceUrl}/auth/me`;  // user-service 유저정보 API
         const res = await fetch(url, {
