@@ -78,7 +78,7 @@ const postReactionController = {
     postHeartNum: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.postHeartNum(req.params.post_id);  // PostReaction 모델의 postHeartNum 메서드 호출
+            const response = await postReaction.postHeartNum(req.params.post_id);  // PostReaction 모델의 postHeartNum 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('하트 개수 확인 실패:', error);
@@ -90,7 +90,7 @@ const postReactionController = {
     postScrapNum: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.postScrapNum(req.params.post_id);  // PostReaction 모델의 postScrapNum 메서드 호출
+            const response = await postReaction.postScrapNum(req.params.post_id);  // PostReaction 모델의 postScrapNum 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('스크랩 개수 확인 실패:', error);
@@ -101,7 +101,8 @@ const postReactionController = {
     // 댓글 작성하기
     uploadComment: async (req, res) => {
         try {
-            const response = await PostReaction.uploadComment(req.body);  // 댓글 생성하는 메서드
+            const postReaction = new PostReaction();
+            const response = await postReaction.uploadComment(req.body);  // 댓글 생성하는 메서드
             return res.json(response);
         } catch (error) {
             console.error('댓글 작성 실패:', error);
@@ -113,7 +114,7 @@ const postReactionController = {
     showCommentListbyPostID: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.showCommentListbyPostID(req.params.post_id);  // 댓글 목록 조회
+            const response = await postReaction.showCommentListbyPostID(req.params.post_id);  // 댓글 목록 조회
             return res.json(response);
         } catch (error) {
             console.error('댓글 목록 조회 실패:', error);
@@ -125,7 +126,7 @@ const postReactionController = {
     deleteComment: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.deleteComment(req.params.user_email, req.params.comment_id, req.params.post_id);  // 댓글 삭제 메서드
+            const response = await postReaction.deleteComment(req.params.user_email, req.params.comment_id, req.params.post_id);  // 댓글 삭제 메서드
             return res.json(response);
         } catch (error) {
             console.error('댓글 삭제 실패:', error);
@@ -137,7 +138,7 @@ const postReactionController = {
     postCommentNum: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.postCommentNum(req.params.post_id);  // 댓글 개수 확인 메서드 호출
+            const response = await postReaction.postCommentNum(req.params.post_id);  // 댓글 개수 확인 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('댓글 개수 확인 실패:', error);
@@ -149,7 +150,7 @@ const postReactionController = {
     commentWriter: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await PostReaction.commentWriter(req.params.comment_id);  // 댓글 작성자 정보 조회
+            const response = await postReaction.commentWriter(req.params.comment_id);  // 댓글 작성자 정보 조회
             return res.json(response);
         } catch (error) {
             console.error('댓글 작성자 정보 조회 실패:', error);
