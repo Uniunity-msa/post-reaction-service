@@ -20,7 +20,8 @@ const postReactionController = {
 
     checkHeart: async (req, res) => {
         try {
-            const response = await PostReaction.checkHeart(req.body);  // PostReaction 모델의 checkHeart 메서드 호출
+            const postReaction = new PostReaction();
+            const response = await postReaction.checkHeart(req.body);  // PostReaction 모델의 checkHeart 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('하트 확인 실패:', error);
