@@ -746,7 +746,7 @@ async commentNumControl({ post_id, isIncrease }) {
                         }
     
                         try {
-                            await this.scrapNumControl({ post_id, isIncrease: false });
+                            await PostReactionStorage.scrapNumControl({ post_id, isIncrease: false });
                         } catch (e) {
                             console.error('스크랩 수 감소 실패:', e.message);
                         }
