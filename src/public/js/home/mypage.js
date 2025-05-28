@@ -9,6 +9,9 @@ const user_name = document.getElementById("user_name");
 const university_name = document.getElementById("university_name");
 const navBar=document.getElementById("navbar");
 
+const currentUrl = window.location.origin; 
+const redirectUri = `${currentUrl}/mypage`; // 로그인/로그아웃 완료 후 돌아올 주소
+
 const loadloginData = async () => {
     try {
         const url = `${userServiceUrl}/auth/me`;  // user-service 유저정보 API
@@ -23,6 +26,7 @@ const loadloginData = async () => {
         }
 
         const data = await res.json();
+
         // 로그인 상태 및 유저정보 세팅
         setLoginHeader({
             loginStatus: true,
@@ -33,6 +37,11 @@ const loadloginData = async () => {
             university_name: data.university_name,
             university_url: data.university_url,
         });
+
+         // 현재 경로가 /mypage가 아니면 리다이렉트
+         if (window.location.pathname !== '/mypage') {
+            window.location.href = redirectUri;
+         }
     } catch (err) {
         console.error("유저 정보 로드 실패:", err);
         setLoginHeader({ loginStatus: false });
@@ -49,8 +58,26 @@ const setLoginHeader = (res) => {
         user_nickname.innerText = res.user_nickname || "";
         university_name.innerText = res.university_name || "";
 
-        loginStatusBtn.setAttribute("href", `${userServiceUrl}/logout`);
+        // loginStatusBtn.setAttribute("href", `${userServiceUrl}/auth/logout`);
         loginStatusBtn.innerText = "로그아웃";
+        loginStatusBtn.onclick = async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(`${userServiceUrl}/auth/logout`, {
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.href = redirectUri;
+                } else {
+                    alert("로그아웃 실패");
+                }
+            } catch (err) {
+                console.error("로그아웃 요청 실패:", err);
+            }
+        };
+
         signUpBtn.setAttribute("href", `${startServiceUrl}/council/${res.university_url || ""}`);
         signUpBtn.innerText = "나의학교";
     } else {
@@ -61,9 +88,9 @@ const setLoginHeader = (res) => {
          user_name.innerText = "";
          university_name.innerText = "";
          
-        loginStatusBtn.setAttribute("href", `${userServiceUrl}/login`);
+        loginStatusBtn.setAttribute("href", `${userServiceUrl}/auth/login`);
         loginStatusBtn.innerText = "로그인";
-        signUpBtn.setAttribute("href", `${userServiceUrl}/signup`);
+        signUpBtn.setAttribute("href", `${userServiceUrl}/user/signup`);
         signUpBtn.innerText = "회원가입";
     }
 };
@@ -81,13 +108,13 @@ const loadLinkData=()=>{
     const communityLink4= document.getElementById("community4_btn");
 
     nicknameLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/modify/nickname`; //user-service의 닉네임변경 화면 호출//
+        window.location.href = `${userServiceUrl}/user/modify/nickname`; //user-service의 닉네임변경 화면 호출//
     });
     pswordLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/modify/password`; //user-service의 비밀번호변경 화면 호출//
+        window.location.href = `${userServiceUrl}/user/modify/password`; //user-service의 비밀번호변경 화면 호출//
     });
     withdrawalLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
+        window.location.href = `${userServiceUrl}/user/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
         window.location.href = `${postServiceUrl}/mypage/community/post/1`; //post-service//
