@@ -425,7 +425,7 @@ class PostReactionStorage {
 // 게시글 존재하는지 확인
 static async validPostId(post_id) {
     try {
-        const response = await axios.get(`http://${baseUrls.baseUrls.postServiceUrl}/showPost/${post_id}`);
+        const response = await axios.get(`http://${baseUrls.postServiceUrl}/showPost/${post_id}`);
         console.log("post-service 통신 성공 - post 불러오기 성공: ",response);
         // 존재하면 200 OK, 데이터 포함
         return true;
@@ -440,7 +440,7 @@ static async validPostId(post_id) {
 
 // 사용자 존재하는지 확인
 static async validUser(user_email) {
-    const exists = await axios.get(`http://${baseUrls.baseUrls.userServiceUrl}/user/info?email=${user_email}`);
+    const exists = await axios.get(`http://${baseUrls.userServiceUrl}/user/info?email=${user_email}`);
     // 응답 구조가 exists가 아닌 result.user_email 포함 여부로 확인(user 쪽 응답값에 exist가 없어서 변경)
     if (!exists.data.result || !exists.data.result.user_email) {
     throw new Error("유저가 존재하지 않습니다.");
@@ -452,8 +452,8 @@ static async validUser(user_email) {
 // 좋아요 수 증가 및 감소
 static async likeNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${baseUrls.baseUrls.postServiceUrl}/increaseHeart`
-        : `http://${baseUrls.baseUrls.postServiceUrl}/decreaseHeart`;
+        ? `http://${baseUrls.postServiceUrl}/increaseHeart`
+        : `http://${baseUrls.postServiceUrl}/decreaseHeart`;
 
     try {
         const response = await axios.patch(url, { post_id }); 
@@ -468,8 +468,8 @@ static async likeNumControl({ post_id, isIncrease }) {
 // 게시글 스크랩 수 증가 및 감소 
 static async scrapNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${baseUrls.baseUrls.postServiceUrl}/increaseScrap`
-        : `http://${baseUrls.baseUrls.postServiceUrl}/decreaseScrap`;
+        ? `http://${baseUrls.postServiceUrl}/increaseScrap`
+        : `http://${baseUrls.postServiceUrl}/decreaseScrap`;
 
     try {
         const response = await axios.patch(url, { post_id }); 
@@ -483,8 +483,8 @@ static async scrapNumControl({ post_id, isIncrease }) {
 // 게시글 댓글 수 증가 및 감소 
 async commentNumControl({ post_id, isIncrease }) {
     const url = isIncrease
-        ? `http://${baseUrls.baseUrls.postServiceUrl}/increaseComment`
-        : `http://${baseUrls.baseUrls.postServiceUrl}/decreaseComment`;
+        ? `http://${baseUrls.postServiceUrl}/increaseComment`
+        : `http://${baseUrls.postServiceUrl}/decreaseComment`;
 
     try {
         const response = await axios.patch(url, { post_id }); 
