@@ -31,7 +31,8 @@ const postReactionController = {
 
     deleteHeart: async (req, res) => {
         try {
-            const response = await PostReaction.deleteHeart(req.params.heart_id);  // PostReaction 모델의 deleteHeart 메서드 호출
+            const postReaction = new PostReaction();
+            const response = await postReaction.deleteHeart(req.params.heart_id);  // PostReaction 모델의 deleteHeart 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('하트 삭제 실패:', error);
@@ -42,7 +43,8 @@ const postReactionController = {
     // 마이페이지) 스크랩 기능
     addScrap: async (req, res) => {
         try {
-            const response = await PostReaction.addScrap(req.body);  // PostReaction 모델의 addScrap 메서드 호출
+            const postReaction = new PostReaction();            
+            const response = await postReaction.addScrap(req.body);  // PostReaction 모델의 addScrap 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('스크랩 추가 실패:', error);
@@ -52,7 +54,8 @@ const postReactionController = {
 
     checkScrap: async (req, res) => {
         try {
-            const response = await PostReaction.checkScrap(req.body);  // PostReaction 모델의 checkScrap 메서드 호출
+            const postReaction = new PostReaction();
+            const response = await postReaction.checkScrap(req.body);  // PostReaction 모델의 checkScrap 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('스크랩 확인 실패:', error);
@@ -62,7 +65,8 @@ const postReactionController = {
 
     deleteScrap: async (req, res) => {
         try {
-            const response = await PostReaction.deleteScrap(req.params.scrap_id);  // PostReaction 모델의 deleteScrap 메서드 호출
+            const postReaction = new PostReaction();
+            const response = await postReaction.deleteScrap(req.params.scrap_id);  // PostReaction 모델의 deleteScrap 메서드 호출
             return res.json(response);
         } catch (error) {
             console.error('스크랩 삭제 실패:', error);
