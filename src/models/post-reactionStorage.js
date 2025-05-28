@@ -736,7 +736,8 @@ async commentNumControl({ post_id, isIncrease }) {
                         pool.releaseConnection(connection);
                         resolve({ result: "This 'scrap_id' does not exist in the 'Scrap' table.", status: 202 });
                     }
-                 
+                    const post_id = check[0].post_id;
+
                     pool.query("DELETE FROM Scrap WHERE scrap_id=?;", [scrap_id], async (err, rows) => {
                         if (err) {
                             console.error('Query 함수 오류', err);
