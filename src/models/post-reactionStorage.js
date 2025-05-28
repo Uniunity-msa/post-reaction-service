@@ -90,7 +90,20 @@ class PostReactionStorage {
                     reject(err)
                 }
 
-                pool.query("select comment_content,like_count_comment,post_id,comment_date,comment_id,user_nickname,user.user_email from Comment comm LEFT JOIN User user ON comm.user_email=user.user_email where post_id=?;", [post_id], function (err, rows) {
+                const query = `
+                SELECT 
+                    comment_content,
+                    like_count_comment,
+                    post_id,
+                    comment_date,
+                    comment_id,
+                    user_email
+                FROM Comment 
+                WHERE post_id = ? 
+                ORDER BY comment_date DESC;
+            `;
+
+                pool.query(query, [post_id], function (err, rows) {
                     pool.releaseConnection(connection);
                     if (err) {
                         console.error('Query 함수 오류', err);
@@ -453,7 +466,6 @@ static async likeNumControl({ post_id, isIncrease }) {
 
 
 // 게시글 스크랩 수 증가 및 감소 
-// TODO : url 수정
 static async scrapNumControl({ post_id, isIncrease }) {
     const url = isIncrease
         ? `http://${baseUrls.baseUrls.postServiceUrl}/increaseScrap`
@@ -483,6 +495,7 @@ async commentNumControl({ post_id, isIncrease }) {
     }
 }
 
+// 유저 정보 가져오기 
 
     // 마이페이지) user_email에 해당하는 사용자의 하트 목록 보여주기
     static getUserHeartList(userInfo) {
@@ -719,6 +732,7 @@ async commentNumControl({ post_id, isIncrease }) {
             })
         });
     }
+
     // 스크랩) Scrap 테이블에 정보 삭제
     static async deleteScrap(scrap_id) {
         return new Promise(async (resolve, reject) => {
@@ -758,6 +772,7 @@ async commentNumControl({ post_id, isIncrease }) {
             })
         });
     }
+
     // 해당 게시글에 scrap 개수 반환
     static postScrapNum(post_id) {
         return new Promise(async (resolve, reject) => {
