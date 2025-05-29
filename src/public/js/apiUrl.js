@@ -8,7 +8,7 @@ const baseUrls = {
 };
 
 // Node.js 환경이면 module.exports 사용
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && module.exports) { 
   module.exports = { baseUrls, apiUrl };
 }
 
