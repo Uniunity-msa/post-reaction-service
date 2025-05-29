@@ -12,25 +12,36 @@ class PostReaction {
     
         for (let i = 0; i < retryCount; i++) {
             try {
-                console.log(`🔌 RabbitMQ 연결 시도 (${i + 1}/${retryCount})...`);
+                console.log(`RabbitMQ 연결 시도 (${i + 1}/${retryCount})...`);
                 const connection = await amqp.connect('amqp://guest:guest@rabbit:5672');
                 const channel = await connection.createChannel();
     
                 await channel.assertQueue('CommentRequestQueue', { durable: true });
                 await channel.assertQueue('HeartRequestQueue', { durable: true });
                 await channel.assertQueue('ScrapRequestQueue', { durable: true });
-    
+        
+                // 래빗엠큐 재연결
+                    connection.on("close", async () => {
+                    console.error("RabbitMQ 연결이 끊어졌습니다. 재연결 시도...");
+                    try {
+                        await this.connectToRabbitMQ(); // 재귀 호출로 재연결
+                        this.consumeMessages(); // 재연결 후 소비 재시작
+                    } catch (reconnectErr) {
+                        console.error("RabbitMQ 재연결 실패:", reconnectErr.message);
+                    }
+                });
+
                 this.channel = channel;
                 console.log("✅ RabbitMQ 연결 성공");
                 return;
             } catch (err) {
-                console.error(`❌ RabbitMQ 연결 실패 (${i + 1}회):`, err.message);
+                console.error(`RabbitMQ 연결 실패 (${i + 1}회):`, err.message);
     
                 if (i < retryCount - 1) {
-                    console.log(`⏳ ${retryDelay / 1000}초 후 재시도...`);
+                    console.log(`${retryDelay / 1000}초 후 재시도...`);
                     await new Promise(res => setTimeout(res, retryDelay));
                 } else {
-                    console.error("💥 RabbitMQ 연결 재시도 모두 실패. 예외 발생!");
+                    console.error("RabbitMQ 연결 재시도 모두 실패. 예외 발생!");
                     throw err;
                 }
             }
