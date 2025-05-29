@@ -1,8 +1,6 @@
-import { baseUrls } from '/js/apiUrl.js';
-
-const postServiceUrl = baseUrls.post;
-const userServiceUrl = baseUrls.user;
-const startServiceUrl = baseUrls.start;
+const postServiceUrl = window.baseUrls.post;
+const userServiceUrl = windowbaseUrls.user;
+const startServiceUrl = windowbaseUrls.start;
 
 //로그인(로그아웃), 회원가입(마이페이지)버튼
 const loginStatusBtn = document.getElementById("loginStatusBtn");
