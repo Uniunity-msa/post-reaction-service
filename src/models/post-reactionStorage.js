@@ -427,7 +427,7 @@ class PostReactionStorage {
 static async validPostId(post_id) {
     try {
         console.log("✅ baseUrls.postServiceUrl:", baseUrls.baseUrls.post);
-        const response = await axios.get(`http://${baseUrls.baseUrls.post}/showPost/${post_id}`);
+        const response = await axios.get(`${baseUrls.baseUrls.post}/showPost/${post_id}`);
         console.log("post-service 통신 성공 - post 불러오기 성공: ",response);
         // 존재하면 200 OK, 데이터 포함
         return true;
