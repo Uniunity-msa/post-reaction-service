@@ -7,21 +7,36 @@ class PostReaction {
         this.body = body;
     }
 
-    async connectToRabbitMQ() {
-        try {
-            const connection = await amqp.connect('amqp://guest:guest@rabbit:5672'); // 나중에 IP 바꾸기
-            const channel = await connection.createChannel();
-
-            await channel.assertQueue('CommentRequestQueue', { durable: true });
-            await channel.assertQueue('HeartRequestQueue', { durable: true });
-            await channel.assertQueue('ScrapRequestQueue', { durable: true });
+    async connectToRabbitMQ(retryCount = 5) {
+        const retryDelay = 3000; // 3초
     
-            this.channel = channel;
-        } catch (err) {
-            console.error('❌ RabbitMQ 연결 실패:', err);
-            throw err;
+        for (let i = 0; i < retryCount; i++) {
+            try {
+                console.log(`🔌 RabbitMQ 연결 시도 (${i + 1}/${retryCount})...`);
+                const connection = await amqp.connect('amqp://guest:guest@rabbit:5672');
+                const channel = await connection.createChannel();
+    
+                await channel.assertQueue('CommentRequestQueue', { durable: true });
+                await channel.assertQueue('HeartRequestQueue', { durable: true });
+                await channel.assertQueue('ScrapRequestQueue', { durable: true });
+    
+                this.channel = channel;
+                console.log("✅ RabbitMQ 연결 성공");
+                return;
+            } catch (err) {
+                console.error(`❌ RabbitMQ 연결 실패 (${i + 1}회):`, err.message);
+    
+                if (i < retryCount - 1) {
+                    console.log(`⏳ ${retryDelay / 1000}초 후 재시도...`);
+                    await new Promise(res => setTimeout(res, retryDelay));
+                } else {
+                    console.error("💥 RabbitMQ 연결 재시도 모두 실패. 예외 발생!");
+                    throw err;
+                }
+            }
         }
     }
+    
 
     // 큐에서 메시지 소비
     consumeMessages() {
