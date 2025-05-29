@@ -1,4 +1,8 @@
-const { userServiceUrl, postServiceUrl, startServiceUrl } = window.baseUrls;
+import { baseUrls } from '/js/apiUrl.js';
+
+const postServiceUrl = baseUrls.post;
+const userServiceUrl = baseUrls.user;
+const startServiceUrl = baseUrls.start;
 
 //로그인(로그아웃), 회원가입(마이페이지)버튼
 const loginStatusBtn = document.getElementById("loginStatusBtn");
@@ -95,7 +99,7 @@ const setLoginHeader = (res) => {
                 } else {
                      //테스트용
                      console.warn("[로그아웃] 실패 상태 코드:", response.status);
-                     
+
                     alert("로그아웃 실패");
                 }
             } catch (err) {
