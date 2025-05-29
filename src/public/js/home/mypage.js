@@ -117,7 +117,7 @@ const setLoginHeader = (res) => {
          
         loginStatusBtn.setAttribute("href", `${userServiceUrl}/auth/login`);
         loginStatusBtn.innerText = "로그인";
-        signUpBtn.setAttribute("href", `${userServiceUrl}/user/signup`);
+        signUpBtn.setAttribute("href", `${userServiceUrl}/user/agreement`);
         signUpBtn.innerText = "회원가입";
     }
 };
