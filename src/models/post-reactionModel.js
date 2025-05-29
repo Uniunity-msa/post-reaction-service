@@ -106,61 +106,6 @@ class PostReaction {
 
     }
 
-    // 큐에서 메시지 소비
-    consumeMessages() {
-
-        // 댓글큐
-        this.channel.consume('CommentRequestQueue', async (msg) => {
-            try {
-                const email = JSON.parse(msg.content.toString());
-                const result = await this.getCommentPostIdsByEmail(email);
-                this.channel.sendToQueue(
-                    msg.properties.replyTo,
-                    Buffer.from(JSON.stringify(result)),
-                    { correlationId: msg.properties.correlationId }
-                );
-                this.channel.ack(msg);
-            } catch (err) {
-                console.error('메시지 처리 중 에러:', err);
-                this.channel.nack(msg, false, true);  // 처리 실패 시 재시도
-            }
-        });
-
-        // 좋아요큐
-        this.channel.consume('HeartRequestQueue', async (msg) => {
-            try {
-                const email = JSON.parse(msg.content.toString());
-                const result = await this.getHeartPostIdsByEmail(email);
-                this.channel.sendToQueue(
-                    msg.properties.replyTo,
-                    Buffer.from(JSON.stringify(result)),
-                    { correlationId: msg.properties.correlationId }
-                );
-                this.channel.ack(msg);
-            } catch (err) {
-                console.error('메시지 처리 중 에러:', err);
-                this.channel.nack(msg, false, true);
-            }
-        });
-
-        // 스크랩큐
-        this.channel.consume('ScrapRequestQueue', async (msg) => {
-            try {
-                const email = JSON.parse(msg.content.toString());
-                const result = await this.getScrapPostIdsByEmail(email);
-                this.channel.sendToQueue(
-                    msg.properties.replyTo,
-                    Buffer.from(JSON.stringify(result)),
-                    { correlationId: msg.properties.correlationId }
-                );
-                this.channel.ack(msg);
-            } catch (err) {
-                console.error('메시지 처리 중 에러:', err);
-                this.channel.nack(msg, false, true);
-            }
-        });
-    }
-
     // 마이페이지) 하트 저장
     async addHeart(heartInfo) {
         try {
