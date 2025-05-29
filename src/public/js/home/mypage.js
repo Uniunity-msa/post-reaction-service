@@ -1,6 +1,6 @@
 const postServiceUrl = window.baseUrls.post;
-const userServiceUrl = windowbaseUrls.user;
-const startServiceUrl = windowbaseUrls.start;
+const userServiceUrl = window.baseUrls.user;
+const startServiceUrl = window.baseUrls.start;
 
 //로그인(로그아웃), 회원가입(마이페이지)버튼
 const loginStatusBtn = document.getElementById("loginStatusBtn");
