@@ -425,7 +425,7 @@ class PostReactionStorage {
 // 게시글 존재하는지 확인
 static async validPostId(post_id) {
     try {
-        console.log("✅ baseUrls.postServiceUrl:", baseUrls.post);
+        console.log("✅ baseUrls.baseUrls.post:", baseUrls.post);
         const response = await axios.get(`http://${baseUrls.post}/showPost/${post_id}`);
         console.log("post-service 통신 성공 - post 불러오기 성공: ",response);
         // 존재하면 200 OK, 데이터 포함
