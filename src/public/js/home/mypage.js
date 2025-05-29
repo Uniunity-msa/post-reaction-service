@@ -38,6 +38,9 @@ const loadloginData = async () => {
 
         const data = await res.json();
 
+        //테스트용
+        console.log("[로그인 체크] 응답 데이터:", data);
+
         // 로그인 상태 및 유저정보 세팅
         setLoginHeader({
             loginStatus: true,
@@ -74,14 +77,25 @@ const setLoginHeader = (res) => {
         loginStatusBtn.onclick = async (e) => {
             e.preventDefault();
             try {
+
+                 //테스트용
+                 console.log("[로그아웃] 요청 시작");
+
                 const response = await fetch(`${userServiceUrl}/auth/logout`, {
                     credentials: "include",
                 });
 
                 if (response.ok) {
                     const data = await response.json();
+
+                    //테스트용
+                    console.log("[로그아웃] 성공:", data);
+
                     window.location.href = redirectUri;
                 } else {
+                     //테스트용
+                     console.warn("[로그아웃] 실패 상태 코드:", response.status);
+                     
                     alert("로그아웃 실패");
                 }
             } catch (err) {

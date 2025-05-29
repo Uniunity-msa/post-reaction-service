@@ -10,7 +10,6 @@ class PostReaction {
     async connectToRabbitMQ() {
         try {
             const connection = await amqp.connect('amqp://guest:guest@rabbit:5672'); // 나중에 IP 바꾸기
-    
             const channel = await connection.createChannel();
 
             await channel.assertQueue('CommentRequestQueue', { durable: true });
@@ -18,7 +17,6 @@ class PostReaction {
             await channel.assertQueue('ScrapRequestQueue', { durable: true });
     
             this.channel = channel;
-            console.log('✅ RabbitMQ 연결 및 채널 생성 완료');
         } catch (err) {
             console.error('❌ RabbitMQ 연결 실패:', err);
             throw err;
@@ -31,6 +29,8 @@ class PostReaction {
         // 댓글큐
         this.channel.consume('CommentRequestQueue', async (msg) => {
             try {
+                //테스트용
+                console.log('[post-reaction-service] CommentRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getCommentPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -39,6 +39,8 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
+                //테스트용
+                console.log('[post-reaction-service] CommentRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);  // 처리 실패 시 재시도
@@ -48,6 +50,8 @@ class PostReaction {
         // 좋아요큐
         this.channel.consume('HeartRequestQueue', async (msg) => {
             try {
+                //테스트용
+                console.log('[post-reaction-service] HeartRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getHeartPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -56,6 +60,8 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
+                //테스트용
+                console.log('[post-reaction-service] HeartRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);
@@ -65,6 +71,8 @@ class PostReaction {
         // 스크랩큐
         this.channel.consume('ScrapRequestQueue', async (msg) => {
             try {
+                //테스트용
+                console.log('[post-reaction-service] ScrapRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getScrapPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -73,6 +81,8 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
+                //테스트용
+                console.log('[post-reaction-service] ScrapRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);
