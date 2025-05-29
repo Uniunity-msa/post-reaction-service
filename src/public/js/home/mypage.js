@@ -144,10 +144,14 @@ const loadLinkData=()=>{
         window.location.href = `${userServiceUrl}/user/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/mypage/community/post/1`; //post-service//
+        const url = `${postServiceUrl}/mypage/community/post/1`;
+        console.log("[클릭] 이동할 URL:", url);
+        window.location.href = url;
     });
     communityLink2.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/mypage/community/post/2`; //post-service//
+        const url = `${postServiceUrl}/mypage/community/post/2`;
+        console.log("[클릭] 이동할 URL:", url);
+        window.location.href = url;
     });
     communityLink3.addEventListener("click", function () {
         window.location.href = `${postServiceUrl}/mypage/community/post/3`; //post-service//
