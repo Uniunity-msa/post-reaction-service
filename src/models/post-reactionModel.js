@@ -218,7 +218,7 @@ class PostReaction {
         }
     }
     //댓글 삭제하기
-    async doDeleteComment(user_email,comment_id,post_id) {
+    async doDeleteComment(user_email,comment_id) {
         try {
             const response = await PostReactionStorage.goDeleteComment(user_email,comment_id);
             if(response.result === true){
