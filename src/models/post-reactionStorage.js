@@ -49,13 +49,13 @@ class PostReactionStorage {
                         try {
                             await PostReactionStorage.commentNumControl({ post_id: commentInfo.post_id, isIncrease: true });
                             console.log('댓글 수 증가 성공');
+                            return resolve({ result: true, status: 201 });
                         } catch (e) {
                             console.error('댓글 수 증가 실패:', e.message);
                             // 댓글 저장은 되었으므로 상태는 207으로 반환
                             return resolve({ result: true, status: 207, warning: '댓글 수 반영 실패' });
                         }
     
-                        return resolve({ result: true, status: 201 });
                     }
                 );
             });
