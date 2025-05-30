@@ -33,10 +33,10 @@ class PostReactionStorage {
                 const formattedDateTime = getCurrentDateTime();
     
                 const insertQuery = 'INSERT INTO Comment(user_email, post_id, comment_content, comment_date) VALUES (?, ?, ?, ?)';
-    
+                
                 connection.query(
                     insertQuery,
-                    [commentInfo.user_email, commentInfo.post_id, commentInfo.comment_content, formattedDateTime],
+                    [commentInfo.user_email, commentInfo.post_id, commentInfo.comment_content, formattedDateTime, 0],
                     async (err) => {
                         connection.release();
     
