@@ -164,7 +164,7 @@ class PostReactionStorage {
                     }
     
                     const post_id = rows[0].post_id;
-    
+                    console.log('🔍 댓글 삭제용 post_id:', post_id);
                     // 2. 댓글 삭제
                     const deleteQuery = 'DELETE FROM Comment WHERE comment_id = ? AND user_email = ?';
                     const deleteResult = await new Promise((res, rej) => {
