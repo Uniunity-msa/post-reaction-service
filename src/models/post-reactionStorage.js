@@ -137,78 +137,98 @@ class PostReactionStorage {
         });
     }
     static async goDeleteComment(user_email, comment_id) {
-        return new Promise((resolve, reject) => {
-            pool.getConnection(async (err, connection) => {
-                if (err) {
-                    console.error('MySQL 연결 오류: ', err);
-                    return reject(err);
-                }
-    
-                try {
-                    // 1. 댓글 ID로 post_id 조회
-                    const getPostIdQuery = 'SELECT post_id FROM Comment WHERE comment_id = ? AND user_email = ?';
-                    const [rows] = await new Promise((res, rej) => {
-                        connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
-                            if (err) return rej(err);
-                            console.log('🔍 쿼리 결과 rows:', result);
-                            res(result);
-                        });
-                    });
-    
-                    if (!rows || rows.length === 0) {
-                        connection.release();
-                        return reject({
-                            result: false,
-                            status: 404,
-                            err: '해당 댓글이 없거나 권한이 없습니다.'
-                        });
-                    }
-    
-                    const post_id = rows[0].post_id;
-                    console.log('🔍 댓글 삭제용 post_id:', post_id);
-                    // 2. 댓글 삭제
-                    const deleteQuery = 'DELETE FROM Comment WHERE comment_id = ? AND user_email = ?';
-                    const deleteResult = await new Promise((res, rej) => {
-                        connection.query(deleteQuery, [comment_id, user_email], (err, result) => {
-                            if (err) return rej(err);
-                            res(result);
-                        });
-                    });
-    
-                    // 3. 연결 해제
-                    connection.release();
-    
-                    if (deleteResult.affectedRows > 0) {
-                        // 4. 댓글 수 감소 요청
-                        try {
-                            await PostReactionStorage.commentNumControl({ post_id, isIncrease: false });
-                            console.log('댓글 수 감소 성공');
-                        } catch (e) {
-                            console.error('댓글 수 감소 요청 실패:', e.message);
+    return new Promise((resolve, reject) => {
+        console.log('🚀 goDeleteComment 시작됨');
+        console.log('📩 받은 파라미터:', { user_email, comment_id });
+
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                console.error('❌ MySQL 연결 오류: ', err);
+                return reject(err);
+            }
+
+            try {
+                // 1. 댓글 ID로 post_id 조회
+                const getPostIdQuery = 'SELECT post_id FROM Comment WHERE comment_id = ? AND user_email = ?';
+                console.log('🛠️ post_id 조회 쿼리 실행 전');
+                const [rows] = await new Promise((res, rej) => {
+                    connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
+                        if (err) {
+                            console.error('❌ post_id 조회 쿼리 오류:', err);
+                            return rej(err);
                         }
-    
-                        return resolve({
-                            result: true,
-                            status: 200
-                        });
-                    } else {
-                        return reject({
-                            result: false,
-                            status: 404,
-                            err: '댓글 삭제에 실패했습니다.'
-                        });
-                    }
-                } catch (error) {
+                        console.log('📥 post_id 조회 쿼리 결과:', result);
+                        res(result);
+                    });
+                });
+
+                console.log("✅ post_id rows:", rows);
+
+                if (!rows || rows.length === 0) {
+                    console.warn("⚠️ 댓글이 없거나 권한 없음");
                     connection.release();
                     return reject({
                         result: false,
-                        status: 500,
-                        err: error.message
+                        status: 404,
+                        err: '해당 댓글이 없거나 권한이 없습니다.'
                     });
                 }
-            });
+
+                const post_id = rows[0].post_id;
+                console.log('🔍 댓글 삭제용 post_id:', post_id);
+
+                // 2. 댓글 삭제
+                const deleteQuery = 'DELETE FROM Comment WHERE comment_id = ? AND user_email = ?';
+                console.log('🧨 댓글 삭제 쿼리 실행 전');
+                const deleteResult = await new Promise((res, rej) => {
+                    connection.query(deleteQuery, [comment_id, user_email], (err, result) => {
+                        if (err) {
+                            console.error('❌ 댓글 삭제 쿼리 오류:', err);
+                            return rej(err);
+                        }
+                        console.log('🗑️ 댓글 삭제 결과:', result);
+                        res(result);
+                    });
+                });
+
+                // 3. 연결 해제
+                connection.release();
+                console.log('🔌 MySQL 연결 해제 완료');
+
+                if (deleteResult.affectedRows > 0) {
+                    // 4. 댓글 수 감소 요청
+                    try {
+                        console.log('📉 댓글 수 감소 요청 시도');
+                        await PostReactionStorage.commentNumControl({ post_id, isIncrease: false });
+                        console.log('✅ 댓글 수 감소 성공');
+                    } catch (e) {
+                        console.error('❌ 댓글 수 감소 요청 실패:', e.message);
+                    }
+
+                    return resolve({
+                        result: true,
+                        status: 200
+                    });
+                } else {
+                    console.warn('⚠️ 댓글 삭제 쿼리는 실행됐으나 삭제된 행 없음');
+                    return reject({
+                        result: false,
+                        status: 404,
+                        err: '댓글 삭제에 실패했습니다.'
+                    });
+                }
+            } catch (error) {
+                console.error('❌ 전체 try 블록 에러:', error);
+                connection.release();
+                return reject({
+                    result: false,
+                    status: 500,
+                    err: error.message
+                });
+            }
         });
-    }
+    });
+}
     
     //댓글 id로 댓글 작성자 불러오기
     static commentWriter(comment_id) {
