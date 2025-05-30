@@ -47,7 +47,7 @@ class PostReactionStorage {
     
                         // 댓글 수 증가 (직접 통신)
                         try {
-                            await this.commentNumControl({ post_id: commentInfo.post_id, isIncrease: true });
+                            await PostReactionStorage.commentNumControl({ post_id: commentInfo.post_id, isIncrease: true });
                             console.log('댓글 수 증가 성공');
                         } catch (e) {
                             console.error('댓글 수 증가 실패:', e.message);
@@ -483,7 +483,7 @@ static async scrapNumControl({ post_id, isIncrease }) {
 }
 
 // 게시글 댓글 수 증가 및 감소 
-async commentNumControl({ post_id, isIncrease }) {
+static async commentNumControl({ post_id, isIncrease }) {
     const url = isIncrease
         ? `${baseUrls.baseUrls.post}/increaseComment`
         : `${baseUrls.baseUrls.post}/decreaseComment`;
