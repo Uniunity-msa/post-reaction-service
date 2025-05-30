@@ -180,7 +180,7 @@ class PostReactionStorage {
                     if (deleteResult.affectedRows > 0) {
                         // 4. 댓글 수 감소 요청
                         try {
-                            await this.commentNumControl({ post_id, isIncrease: false });
+                            await PostReactionStorage.commentNumControl({ post_id, isIncrease: false });
                             console.log('댓글 수 감소 성공');
                         } catch (e) {
                             console.error('댓글 수 감소 요청 실패:', e.message);
