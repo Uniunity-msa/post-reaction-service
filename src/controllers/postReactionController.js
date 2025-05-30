@@ -101,8 +101,8 @@ const postReactionController = {
     // 댓글 작성하기
     uploadComment: async (req, res) => {
         try {
-            const postReaction = new PostReaction();
-            const response = await postReaction.createComment(req.body);  // 댓글 생성하는 메서드
+            const postReaction = new PostReaction(req.body); 
+            const response = await postReaction.createComment(); 
             return res.json(response);
         } catch (error) {
             console.error('댓글 작성 실패:', error);
