@@ -103,6 +103,7 @@ const postReactionController = {
         try {
             const postReaction = new PostReaction(req.body); 
             const response = await postReaction.createComment(); 
+            console.log("🔥 [댓글작성 응답]", response);
             return res.json(response);
         } catch (error) {
             console.error('댓글 작성 실패:', error);
