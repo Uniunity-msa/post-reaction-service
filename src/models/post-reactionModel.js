@@ -203,11 +203,20 @@ class PostReaction {
         try {
             const response1 = await PostReactionStorage.saveComment(client);
             const response2 = await PostReactionStorage.updatePostCommentCount(client.post_id);
-            if(response1.result==true && response2.result==true){
-                return response1;
+
+            if (response1.result === true && response2.result === true) {
+                return response1; 
+            } else {
+                return {
+                    result: false,
+                    err: {
+                        saveComment: response1,
+                        updateCount: response2
+                    }
+                };
             }
         } catch (err) {
-            return { result:false, err }
+            return { result: false, err };
         }
     }
     //댓글 삭제하기
