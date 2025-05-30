@@ -797,7 +797,10 @@ async commentNumControl({ post_id, isIncrease }) {
 
     static getPostIdsByEmailFromScrap(userEmail) {
         return new Promise((resolve, reject) => {
-            const email = userEmail.email; 
+            const email = typeof userEmail === 'object' && userEmail.user_email
+  ? userEmail.user_email.trim()
+  : String(userEmail).trim();
+
             // 이메일에 해당하는 post_id 조회 쿼리
             const query = `
                 SELECT DISTINCT post_id
@@ -818,7 +821,10 @@ async commentNumControl({ post_id, isIncrease }) {
     }
     static getPostIdsByEmailFromHeart(userEmail) {
         return new Promise((resolve, reject) => {
-            const email = userEmail.email; 
+            const email = typeof userEmail === 'object' && userEmail.user_email
+  ? userEmail.user_email.trim()
+  : String(userEmail).trim();
+
             // 이메일에 해당하는 post_id 조회 쿼리
             const query = `
                 SELECT DISTINCT post_id
@@ -839,7 +845,10 @@ async commentNumControl({ post_id, isIncrease }) {
     }
     static getPostIdsByEmailFromComment(userEmail) {
     return new Promise((resolve, reject) => {
-        const email = userEmail.email; 
+        const email = typeof userEmail === 'object' && userEmail.user_email
+  ? userEmail.user_email.trim()
+  : String(userEmail).trim();
+
         // 이메일에 해당하는 post_id 조회 쿼리
         const query = `
             SELECT DISTINCT post_id
