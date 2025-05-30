@@ -127,7 +127,7 @@ const postReactionController = {
     deleteComment: async (req, res) => {
         try {
             const postReaction = new PostReaction();
-            const response = await postReaction.deleteComment(req.params.user_email, req.params.comment_id, req.params.post_id);  // 댓글 삭제 메서드
+            const response = await postReaction.doDeleteComment(req.params.user_email, req.params.comment_id, req.params.post_id);  // 댓글 삭제 메서드
             return res.json(response);
         } catch (error) {
             console.error('댓글 삭제 실패:', error);
