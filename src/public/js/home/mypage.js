@@ -76,33 +76,24 @@ const setLoginHeader = (res) => {
 
         // loginStatusBtn.setAttribute("href", `${userServiceUrl}/auth/logout`);
         loginStatusBtn.innerText = "로그아웃";
-        loginStatusBtn.onclick = async (e) => {
-            e.preventDefault();
+        loginStatusBtn.onclick = async () => {
             try {
-
-                 //테스트용
-                 console.log("[로그아웃] 요청 시작");
-
-                const response = await fetch(`${userServiceUrl}/auth/logout`, {
-                    credentials: "include",
+                const res = await fetch(`${userServiceUrl}/auth/logout`, {
+                  method: "POST",
+                  credentials: "include"
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-
-                    //테스트용
-                    console.log("[로그아웃] 성공:", data);
-
-                    window.location.href = redirectUri;
+            
+                if (res.ok) {
+                  // 로그아웃 성공 시 페이지 새로고침
+                  window.location.reload(); // 또는 window.location.href = "/";
                 } else {
-                     //테스트용
-                     console.warn("[로그아웃] 실패 상태 코드:", response.status);
-
-                    alert("로그아웃 실패");
+                  const data = await res.json();
+                  alert(data.message || "로그아웃에 실패했습니다.");
                 }
-            } catch (err) {
-                console.error("로그아웃 요청 실패:", err);
-            }
+              } catch (err) {
+                console.error("로그아웃 요청 중 오류 발생:", err);
+                alert("서버 오류로 로그아웃에 실패했습니다.");
+              }
         };
 
         signUpBtn.setAttribute("href", `${startServiceUrl}/council/${res.university_url || ""}`);
@@ -144,13 +135,11 @@ const loadLinkData=()=>{
         window.location.href = `${userServiceUrl}/user/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
-        const url = `${postServiceUrl}/mypage/community/post/1`;
-        console.log("[클릭] 이동할 URL:", url);
+        const url = `${postServiceUrl}/mypage/community/post/1`; //post-service//
         window.location.href = url;
     });
     communityLink2.addEventListener("click", function () {
-        const url = `${postServiceUrl}/mypage/community/post/2`;
-        console.log("[클릭] 이동할 URL:", url);
+        const url = `${postServiceUrl}/mypage/community/post/2`; //post-service//
         window.location.href = url;
     });
     communityLink3.addEventListener("click", function () {
@@ -163,7 +152,6 @@ const loadLinkData=()=>{
 
 // 로드 후 loadData()실행
 window.addEventListener('DOMContentLoaded', function () {
-    console.log("DOM Content Loaded");
     loadloginData();
     loadLinkData();
 });
