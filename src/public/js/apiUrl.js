@@ -1,4 +1,4 @@
-const apiUrl = 'http://34.47.84.123';
+const apiUrl = 'http://34.22.87.148';
 
 const baseUrls = {
   post: `${apiUrl}:3000`, // post-service
