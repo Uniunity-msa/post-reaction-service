@@ -54,10 +54,10 @@ const loadloginData = async () => {
             university_url: data.university_url,
         });
 
-        //  // 현재 경로가 /mypage가 아니면 리다이렉트
-        //  if (window.location.pathname !== '/mypage') {
-        //     window.location.href = redirectUri;
-        //  }
+         // 현재 경로가 /mypage가 아니면 리다이렉트
+         if (window.location.pathname !== '/mypage') {
+            window.location.href = redirectUri;
+         }
     } catch (err) {
         console.error("유저 정보 로드 실패:", err);
         setLoginHeader({ loginStatus: false });
