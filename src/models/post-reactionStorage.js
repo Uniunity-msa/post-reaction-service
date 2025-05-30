@@ -151,7 +151,7 @@ class PostReactionStorage {
                 // 1. 댓글 ID로 post_id 조회
                 const getPostIdQuery = 'SELECT post_id FROM Comment WHERE comment_id = ? AND user_email = ?';
                 console.log('🛠️ post_id 조회 쿼리 실행 전');
-                const [rows] = await new Promise((res, rej) => {
+                const rows = await new Promise((res, rej) => {
                     connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
                         if (err) {
                             console.error('❌ post_id 조회 쿼리 오류:', err);
