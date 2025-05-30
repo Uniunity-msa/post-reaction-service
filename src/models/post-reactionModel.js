@@ -199,19 +199,17 @@ class PostReaction {
     }
     //댓글 작성하기
     async createComment() {
-        const client = this.body;
+         const client = this.body;
         try {
-            const response1 = await PostReactionStorage.saveComment(client);
-            const response2 = await PostReactionStorage.updatePostCommentCount(client.post_id);
+            const response = await PostReactionStorage.saveComment(client);
 
-            if (response1.result === true && response2.result === true) {
-                return response1; 
+            if (response.result === true) {
+                return response;
             } else {
                 return {
                     result: false,
                     err: {
-                        saveComment: response1,
-                        updateCount: response2
+                        saveComment: response
                     }
                 };
             }
