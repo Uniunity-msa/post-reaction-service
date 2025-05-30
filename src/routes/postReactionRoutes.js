@@ -26,7 +26,7 @@ router.get("/showComment/postviewer/:post_id",postReactionController.showComment
 router.post("/uploadComment/postviewer",postReactionController.uploadComment); //댓글 작성하기
 
 //댓글 삭제하기
-router.delete('/doDeleteComment/:post_id/:user_email/:comment_id', postReactionController.deleteComment); 
+router.delete('/doDeleteComment/:user_email/:comment_id', postReactionController.deleteComment); 
 
 //댓글 개수 받아오기
 router.get("/postCommentNum/:post_id",postReactionController.postCommentNum);
