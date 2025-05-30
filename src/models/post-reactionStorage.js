@@ -150,6 +150,7 @@ class PostReactionStorage {
                     const [rows] = await new Promise((res, rej) => {
                         connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
                             if (err) return rej(err);
+                            console.log('🔍 쿼리 결과 rows:', result);
                             res(result);
                         });
                     });
