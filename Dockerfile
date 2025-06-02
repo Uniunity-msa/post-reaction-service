@@ -15,10 +15,10 @@ RUN npm install
 COPY . .
 
 # 5. wait-for.sh 실행 권한 부여
-RUN chmod +x wait-for.sh
+#RUN chmod +x wait-for.sh
 
 # 6. 앱이 사용하는 포트 열기 (ex: 3000)
 EXPOSE 3002
 
 # 7. 서버 실행
-CMD ["./wait-for.sh", "mysql_host", "3306", "node", "index.js"]
+#CMD ["./wait-for.sh", "mysql_host", "3306", "node", "index.js"]
