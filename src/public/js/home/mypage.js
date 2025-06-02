@@ -1,4 +1,4 @@
-const postServiceUrl = window.baseUrls.reaction;
+const postServiceUrl = window.baseUrls.post;
 const userServiceUrl = window.baseUrls.user;
 const startServiceUrl = window.baseUrls.start;
 
@@ -135,18 +135,18 @@ const loadLinkData=()=>{
         window.location.href = `${userServiceUrl}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
-        const url = `${postServiceUrl}/community/post/1`; //post-service//
+        const url = `${postServiceUrl}/mypage/community/post/1`; //post-service//
         window.location.href = url;
     });
     communityLink2.addEventListener("click", function () {
-        const url = `${postServiceUrl}/community/post/2`; //post-service//
+        const url = `${postServiceUrl}/mypage/community/post/2`; //post-service//
         window.location.href = url;
     });
     communityLink3.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/community/post/3`; //post-service//
+        window.location.href = `${postServiceUrl}/mypage/community/post/3`; //post-service//
     });
     communityLink4.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/community/post/4`; //post-service//
+        window.location.href = `${postServiceUrl}/mypage/community/post/4`; //post-service//
     });
 }
 
