@@ -13,7 +13,7 @@ class PostReaction {
         for (let i = 0; i < retryCount; i++) {
             try {
                 console.log(`RabbitMQ 연결 시도 (${i + 1}/${retryCount})...`);
-                const connection = await amqp.connect('amqp://guest:guest@rabbit:5672');
+                const connection = await amqp.connect(process.env.RABBIT || 'amqp://localhost');
                 const channel = await connection.createChannel();
     
                 await channel.assertQueue('CommentRequestQueue', { durable: true });
