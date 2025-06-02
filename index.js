@@ -31,7 +31,7 @@ app.get("/mypage", (req, res) => {
   res.sendFile(path.join(__dirname, "src/views/home/mypage.html"));
 });
 // /contact 경로에서 정적 HTML 제공
-app.get("/contact", (req, res) => {
+app.get("/mypage/contact", (req, res) => {
   res.sendFile(path.join(__dirname, "src/views/home/contact.html"));
 });
 
