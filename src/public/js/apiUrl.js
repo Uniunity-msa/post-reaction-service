@@ -1,10 +1,10 @@
-const apiUrl = 'http://34.22.87.148';
+const apiUrl = 'http://uniunity.store';
 
 const baseUrls = {
-  post: `${apiUrl}:3000`, // post-service
-  reaction: `${apiUrl}:3002`,   // post-reaction-service
-  user: `${apiUrl}:3004`,     // user-service
-  start: `${apiUrl}:3001`     // start-service
+  post: `${apiUrl}/post`, // post-service
+  reaction: `${apiUrl}/mypage`,   // post-reaction-service
+  user: `${apiUrl}/auth`,     // user-service
+  start: `${apiUrl}/council`     // start-service
 };
 
 // Node.js 환경이면 module.exports 사용

@@ -1,4 +1,4 @@
-const postServiceUrl = window.baseUrls.post;
+const postServiceUrl = window.baseUrls.reaction;
 const userServiceUrl = window.baseUrls.user;
 const startServiceUrl = window.baseUrls.start;
 
@@ -27,7 +27,7 @@ const loadloginData = async () => {
     //     university_url: "test-university"     // 임의 학교 URL
     //   });
     try {
-        const url = `${userServiceUrl}/auth/me`;  // user-service 유저정보 API
+        const url = `${userServiceUrl}/me`;  // user-service 유저정보 API
         const res = await fetch(url, {
             credentials: "include", // 쿠키 포함
         });
@@ -78,7 +78,7 @@ const setLoginHeader = (res) => {
         loginStatusBtn.innerText = "로그아웃";
         loginStatusBtn.onclick = async () => {
             try {
-                const res = await fetch(`${userServiceUrl}/auth/logout`, {
+                const res = await fetch(`${userServiceUrl}/logout`, {
                   method: "POST",
                   credentials: "include"
                 });
@@ -96,7 +96,7 @@ const setLoginHeader = (res) => {
               }
         };
 
-        signUpBtn.setAttribute("href", `${startServiceUrl}/council/${res.university_url || ""}`);
+        signUpBtn.setAttribute("href", `${startServiceUrl}/${res.university_url || ""}`);
         signUpBtn.innerText = "나의학교";
     } else {
          // 비로그인 시 정보 초기화
@@ -106,9 +106,9 @@ const setLoginHeader = (res) => {
          user_name.innerText = "";
          university_name.innerText = "";
          
-        loginStatusBtn.setAttribute("href", `${userServiceUrl}/auth/login`);
+        loginStatusBtn.setAttribute("href", `${userServiceUrl}/login`);
         loginStatusBtn.innerText = "로그인";
-        signUpBtn.setAttribute("href", `${userServiceUrl}/user/agreement`);
+        signUpBtn.setAttribute("href", `${userServiceUrl}/agreement`);
         signUpBtn.innerText = "회원가입";
     }
 };
@@ -126,27 +126,27 @@ const loadLinkData=()=>{
     const communityLink4= document.getElementById("community4_btn");
 
     nicknameLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/user/modify/nickname`; //user-service의 닉네임변경 화면 호출//
+        window.location.href = `${userServiceUrl}/modify/nickname`; //user-service의 닉네임변경 화면 호출//
     });
     pswordLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/user/modify/password`; //user-service의 비밀번호변경 화면 호출//
+        window.location.href = `${userServiceUrl}/modify/password`; //user-service의 비밀번호변경 화면 호출//
     });
     withdrawalLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/user/withdrawal`; //user-service의 회원탈퇴 화면 호출//
+        window.location.href = `${userServiceUrl}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
-        const url = `${postServiceUrl}/mypage/community/post/1`; //post-service//
+        const url = `${postServiceUrl}/community/post/1`; //post-service//
         window.location.href = url;
     });
     communityLink2.addEventListener("click", function () {
-        const url = `${postServiceUrl}/mypage/community/post/2`; //post-service//
+        const url = `${postServiceUrl}/community/post/2`; //post-service//
         window.location.href = url;
     });
     communityLink3.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/mypage/community/post/3`; //post-service//
+        window.location.href = `${postServiceUrl}/community/post/3`; //post-service//
     });
     communityLink4.addEventListener("click", function () {
-        window.location.href = `${postServiceUrl}/mypage/community/post/4`; //post-service//
+        window.location.href = `${postServiceUrl}/community/post/4`; //post-service//
     });
 }
 
