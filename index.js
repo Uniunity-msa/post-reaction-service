@@ -15,7 +15,7 @@ app.use(cors());
   try {
       await postReaction.connectToRabbitMQ();
       postReaction.consumeMessages();
-      console.log('✅ RabbitMQ 연결 및 메시지 소비 준비 완료');
+      console.log('✅ RabbitMQ 연결 완료');
   } catch (err) {
       console.error("RabbitMQ 연결 실패:", err);
       process.exit(1);
@@ -43,5 +43,5 @@ app.use("/", postRouter);
 
 // 서버 시작
 app.listen(PORT, () => {
-  console.log(`✅ server running: http://localhost:${PORT}`);
+  console.log(`✅ server running`);
 });
