@@ -24,7 +24,8 @@ app.use(cors());
 
 // 정적 파일 제공 (예: CSS, JS, 이미지 등)
 app.use(express.static(path.join(__dirname, 'src', 'public'))); // 필요시 public 폴더 사용
-
+app.use("/mypage/css",express.static(path.join(__dirname, 'src', 'public', 'css'))); 
+app.use("/mypage/js",express.static(path.join(__dirname, 'src', 'public', 'js'))); 
 // /mypage 경로에서 정적 HTML 제공
 app.get("/mypage", (req, res) => {
   res.sendFile(path.join(__dirname, "src/views/home/mypage.html"));
