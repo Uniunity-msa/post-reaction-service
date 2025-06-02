@@ -22,3 +22,4 @@ EXPOSE 3002
 
 # 7. 서버 실행
 #CMD ["./wait-for.sh", "mysql_host", "3306", "node", "index.js"]
+CMD node server.js
