@@ -1,4 +1,4 @@
-const apiUrl = 'http://uniunity';
+const apiUrl = 'http://uniunity.store';
 
 const baseUrls = {
   post: `${apiUrl}/post`, // post-service
