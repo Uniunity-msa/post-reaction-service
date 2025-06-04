@@ -472,6 +472,7 @@ static async validPostId(post_id) {
 
 // 사용자 존재하는지 확인
 static async validUser(user_email) {
+    console.log("validUser 호출");
     const exists = await axios.get(`${baseUrls.baseUrls.user}/user/info?email=${user_email}`);
     // 응답 구조가 exists가 아닌 result.user_email 포함 여부로 확인(user 쪽 응답값에 exist가 없어서 변경)
     if (!exists.data.result || !exists.data.result.user_email) {
