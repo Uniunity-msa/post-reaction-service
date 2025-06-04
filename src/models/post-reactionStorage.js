@@ -382,6 +382,7 @@ class PostReactionStorage {
    
     // 좋아요 기능
     static async addHeart(heartInfo) {
+        console.log("스토리지 호출됨");
         const post_id = heartInfo.post_id;
         const user_email = heartInfo.user_email;
     
@@ -410,21 +411,29 @@ class PostReactionStorage {
                     // 이미 하트 눌렀는지 확인
                     connection.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?", [post_id, user_email], async (err, check) => {
                         if (err) {
+                            console.error("SELECT 쿼리 에러:", err);
                             connection.release();
                             return reject(err);
                         }
     
                         if (check.length > 0) {
+                            console.log("이미 하트를 누른 사용자입니다.");
                             connection.release();
                             return resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
                         }
     
                         // 하트 추가
+                        console.log("하트 추가 쿼리 실행: ", post_id, user_email);
                         connection.query("INSERT INTO Heart(post_id, user_email) VALUES (?, ?);", [post_id, user_email], async (err, rows) => {
                             connection.release();
     
-                            if (err) return reject(err);
+                            if (err) {
+                                console.error("INSERT 쿼리 에러:", err);
+                                return reject(err);
+                            }
     
+                            console.log("INSERT 성공:", rows);
+                            
                             try {
                                 await this.likeNumControl({ post_id, isIncrease: true });
                                 console.log('좋아요 수 증가 성공');
