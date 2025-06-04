@@ -1,5 +1,6 @@
 const postServiceUrl = window.baseUrls.post;
 const userServiceUrl = window.baseUrls.user;
+const councilServiceUrl = window.baseUrls.council;
 const startServiceUrl = window.baseUrls.start;
 
 //로그인(로그아웃), 회원가입(마이페이지)버튼
@@ -96,7 +97,7 @@ const setLoginHeader = (res) => {
               }
         };
 
-        signUpBtn.setAttribute("href", `${startServiceUrl}/${res.university_url || ""}`);
+        signUpBtn.setAttribute("href", `${councilServiceUrl}/${res.university_url || ""}`);
         signUpBtn.innerText = "나의학교";
     } else {
          // 비로그인 시 정보 초기화
