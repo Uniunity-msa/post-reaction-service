@@ -4,6 +4,7 @@ const baseUrls = {
   post: `${apiUrl}/post`, // post-service
   reaction: `${apiUrl}/reaction`,   // post-reaction-service
   user: `${apiUrl}/auth`,     // user-service
+  user2: `${apiUrl}/user`,
   council: `${apiUrl}/council`,     // start-service
   start: `${apiUrl}/mainpage`, 
 };
