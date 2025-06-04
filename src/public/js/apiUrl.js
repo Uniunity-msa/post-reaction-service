@@ -2,7 +2,7 @@ const apiUrl = 'http://uniunity.store';
 
 const baseUrls = {
   post: `${apiUrl}/post`, // post-service
-  reaction: `${apiUrl}/mypage`,   // post-reaction-service
+  reaction: `${apiUrl}/reaction`,   // post-reaction-service
   user: `${apiUrl}/auth`,     // user-service
   council: `${apiUrl}/council`,     // start-service
   start: `${apiUrl}/start`, 

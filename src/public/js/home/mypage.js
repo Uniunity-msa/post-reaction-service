@@ -56,7 +56,7 @@ const loadloginData = async () => {
         });
 
          // 현재 경로가 /mypage가 아니면 리다이렉트
-         if (window.location.pathname !== '/mypage') {
+         if (window.location.pathname !== '/reaction/mypage') {
             window.location.href = redirectUri;
          }
     } catch (err) {

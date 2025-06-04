@@ -34,9 +34,9 @@ router.get("/getCommentWriter/:comment_id",postReactionController.commentWriter)
 
 
 //마이페이지 페이지
-router.get("/mypage",postReactionController.mypage);
+router.get("/reaction/mypage",postReactionController.mypage);
 //마이페이지 내 contact 페이지
-router.get("/contact",postReactionController.contact);
+router.get("/reaction/mypage/contact",postReactionController.contact);
 
 
 module.exports=router;
