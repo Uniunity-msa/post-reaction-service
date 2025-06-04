@@ -5,7 +5,7 @@ const baseUrls = {
   reaction: `${apiUrl}/reaction`,   // post-reaction-service
   user: `${apiUrl}/auth`,     // user-service
   council: `${apiUrl}/council`,     // start-service
-  start: `${apiUrl}/start`, 
+  start: `${apiUrl}/mainpage`, 
 };
 
 // Node.js 환경이면 module.exports 사용
