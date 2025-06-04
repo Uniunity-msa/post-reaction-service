@@ -124,6 +124,7 @@ class PostReaction {
     // 마이페이지) 하트 저장
     async addHeart(heartInfo) {
         try {
+            console.log("모델 호출됨");
             const response = await PostReactionStorage.addHeart(heartInfo);
             return response;
         } catch (err) {
