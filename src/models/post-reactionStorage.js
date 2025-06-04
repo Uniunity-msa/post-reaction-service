@@ -407,7 +407,7 @@ class PostReactionStorage {
                         connection.release();
                         return resolve({ result: "User does not exist.", status: 202 });
                     }
-    
+                    console.log("쿼리 전");
                     // 이미 하트 눌렀는지 확인
                     connection.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?", [post_id, user_email], async (err, check) => {
                         if (err) {
@@ -433,7 +433,7 @@ class PostReactionStorage {
                             }
     
                             console.log("INSERT 성공:", rows);
-                            
+
                             try {
                                 await this.likeNumControl({ post_id, isIncrease: true });
                                 console.log('좋아요 수 증가 성공');
@@ -473,6 +473,7 @@ static async validPostId(post_id) {
 // 사용자 존재하는지 확인
 static async validUser(user_email) {
     const exists = await axios.get(`${baseUrls.baseUrls.user}/user/info?email=${user_email}`);
+    console.log("validUser 호출");
     // 응답 구조가 exists가 아닌 result.user_email 포함 여부로 확인(user 쪽 응답값에 exist가 없어서 변경)
     if (!exists.data.result || !exists.data.result.user_email) {
     throw new Error("유저가 존재하지 않습니다.");
