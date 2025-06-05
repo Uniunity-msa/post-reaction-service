@@ -59,8 +59,6 @@ class PostReaction {
         // 댓글큐
         this.channel.consume('CommentRequestQueue', async (msg) => {
             try {
-                //테스트용
-                console.log('[post-reaction-service] CommentRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getCommentPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -69,8 +67,6 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
-                //테스트용
-                console.log('[post-reaction-service] CommentRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);  // 처리 실패 시 재시도
@@ -80,8 +76,6 @@ class PostReaction {
         // 좋아요큐
         this.channel.consume('HeartRequestQueue', async (msg) => {
             try {
-                //테스트용
-                console.log('[post-reaction-service] HeartRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getHeartPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -90,8 +84,6 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
-                //테스트용
-                console.log('[post-reaction-service] HeartRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);
@@ -101,8 +93,6 @@ class PostReaction {
         // 스크랩큐
         this.channel.consume('ScrapRequestQueue', async (msg) => {
             try {
-                //테스트용
-                console.log('[post-reaction-service] ScrapRequestQueue 메시지 수신:', msg.content.toString());
                 const email = JSON.parse(msg.content.toString());
                 const result = await this.getScrapPostIdsByEmail(email);
                 this.channel.sendToQueue(
@@ -111,8 +101,6 @@ class PostReaction {
                     { correlationId: msg.properties.correlationId }
                 );
                 this.channel.ack(msg);
-                //테스트용
-                console.log('[post-reaction-service] ScrapRequestQueue 메시지 ACK 및 응답 전송 완료');
             } catch (err) {
                 console.error('메시지 처리 중 에러:', err);
                 this.channel.nack(msg, false, true);
@@ -124,7 +112,6 @@ class PostReaction {
     // 마이페이지) 하트 저장
     async addHeart(heartInfo) {
         try {
-            console.log("모델 호출됨");
             const response = await PostReactionStorage.addHeart(heartInfo);
             return response;
         } catch (err) {

@@ -9,7 +9,6 @@ const postReactionController = {
     // 마이페이지) 하트 기능
     addHeart: async (req, res) => {
         try {
-            console.log("리액션 컨트롤러 호출됨");
             const postReaction = new PostReaction();
             const response = await postReaction.addHeart(req.body);  // PostReaction 모델의 addHeart 메서드 호출
             return res.json(response);
@@ -104,7 +103,6 @@ const postReactionController = {
         try {
             const postReaction = new PostReaction(req.body); 
             const response = await postReaction.createComment(); 
-            console.log("🔥 [댓글작성 응답]", response);
             return res.json(response);
         } catch (error) {
             console.error('댓글 작성 실패:', error);

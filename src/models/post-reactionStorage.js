@@ -41,17 +41,14 @@ class PostReactionStorage {
                         connection.release();
     
                         if (err) {
-                            console.error('INSERT Query 함수 오류', err);
                             return reject({ result: false, status: 500, err: `${err}` });
                         }
     
                         // 댓글 수 증가 (직접 통신)
                         try {
                             await PostReactionStorage.commentNumControl({ post_id: commentInfo.post_id, isIncrease: true });
-                            console.log('댓글 수 증가 성공');
                             return resolve({ result: true, status: 201 });
                         } catch (e) {
-                            console.error('댓글 수 증가 실패:', e.message);
                             // 댓글 저장은 되었으므로 상태는 207으로 반환
                             return resolve({ result: true, status: 207, warning: '댓글 수 반영 실패' });
                         }
@@ -138,8 +135,6 @@ class PostReactionStorage {
     }
     static async goDeleteComment(user_email, comment_id) {
     return new Promise((resolve, reject) => {
-        console.log('🚀 goDeleteComment 시작됨');
-        console.log('📩 받은 파라미터:', { user_email, comment_id });
 
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -150,19 +145,15 @@ class PostReactionStorage {
             try {
                 // 1. 댓글 ID로 post_id 조회
                 const getPostIdQuery = 'SELECT post_id FROM Comment WHERE comment_id = ? AND user_email = ?';
-                console.log('🛠️ post_id 조회 쿼리 실행 전');
                 const rows = await new Promise((res, rej) => {
                     connection.query(getPostIdQuery, [comment_id, user_email], (err, result) => {
                         if (err) {
                             console.error('❌ post_id 조회 쿼리 오류:', err);
                             return rej(err);
                         }
-                        console.log('📥 post_id 조회 쿼리 결과:', result);
                         res(result);
                     });
                 });
-
-                console.log("✅ post_id rows:", rows);
 
                 if (!rows || rows.length === 0) {
                     console.warn("⚠️ 댓글이 없거나 권한 없음");
@@ -175,32 +166,26 @@ class PostReactionStorage {
                 }
 
                 const post_id = rows[0].post_id;
-                console.log('🔍 댓글 삭제용 post_id:', post_id);
 
                 // 2. 댓글 삭제
                 const deleteQuery = 'DELETE FROM Comment WHERE comment_id = ? AND user_email = ?';
-                console.log('🧨 댓글 삭제 쿼리 실행 전');
                 const deleteResult = await new Promise((res, rej) => {
                     connection.query(deleteQuery, [comment_id, user_email], (err, result) => {
                         if (err) {
                             console.error('❌ 댓글 삭제 쿼리 오류:', err);
                             return rej(err);
                         }
-                        console.log('🗑️ 댓글 삭제 결과:', result);
                         res(result);
                     });
                 });
 
                 // 3. 연결 해제
                 connection.release();
-                console.log('🔌 MySQL 연결 해제 완료');
 
                 if (deleteResult.affectedRows > 0) {
                     // 4. 댓글 수 감소 요청
                     try {
-                        console.log('📉 댓글 수 감소 요청 시도');
                         await PostReactionStorage.commentNumControl({ post_id, isIncrease: false });
-                        console.log('✅ 댓글 수 감소 성공');
                     } catch (e) {
                         console.error('❌ 댓글 수 감소 요청 실패:', e.message);
                     }
@@ -382,7 +367,6 @@ class PostReactionStorage {
    
     // 좋아요 기능
     static async addHeart(heartInfo) {
-        console.log("스토리지 호출됨");
         const post_id = heartInfo.post_id;
         const user_email = heartInfo.user_email;
     
@@ -407,23 +391,19 @@ class PostReactionStorage {
                         connection.release();
                         return resolve({ result: "User does not exist.", status: 202 });
                     }
-                    console.log("쿼리 전");
                     // 이미 하트 눌렀는지 확인
                     connection.query("SELECT * FROM Heart WHERE post_id=? AND user_email=?", [post_id, user_email], async (err, check) => {
                         if (err) {
-                            console.error("SELECT 쿼리 에러:", err);
                             connection.release();
                             return reject(err);
                         }
     
                         if (check.length > 0) {
-                            console.log("이미 하트를 누른 사용자입니다.");
                             connection.release();
                             return resolve({ result: "You have already clicked 'Heart' on this post.", status: 202 });
                         }
     
                         // 하트 추가
-                        console.log("하트 추가 쿼리 실행: ", post_id, user_email);
                         connection.query("INSERT INTO Heart(post_id, user_email) VALUES (?, ?);", [post_id, user_email], async (err, rows) => {
                             connection.release();
     
@@ -431,12 +411,9 @@ class PostReactionStorage {
                                 console.error("INSERT 쿼리 에러:", err);
                                 return reject(err);
                             }
-    
-                            console.log("INSERT 성공:", rows);
 
                             try {
                                 await this.likeNumControl({ post_id, isIncrease: true });
-                                console.log('좋아요 수 증가 성공');
                             } catch (e) {
                                 console.error('좋아요 수 증가 요청 실패:', e.message);
                             }
@@ -456,9 +433,7 @@ class PostReactionStorage {
 // 게시글 존재하는지 확인
 static async validPostId(post_id) {
     try {
-        console.log("✅ baseUrls.postServiceUrl:", baseUrls.baseUrls.post);
         const response = await axios.get(`${baseUrls.baseUrls.post}/showPost/${post_id}`);
-        console.log("post-service 통신 성공 - post 불러오기 성공: ",response);
         // 존재하면 200 OK, 데이터 포함
         return true;
     } catch (error) {
@@ -472,7 +447,6 @@ static async validPostId(post_id) {
 
 // 사용자 존재하는지 확인
 static async validUser(user_email) {
-    console.log("validUser 호출");
     const exists = await axios.get(`${baseUrls.baseUrls.user2}/info?email=${user_email}`);
     // 응답 구조가 exists가 아닌 result.user_email 포함 여부로 확인(user 쪽 응답값에 exist가 없어서 변경)
     if (!exists.data.result || !exists.data.result.user_email) {
