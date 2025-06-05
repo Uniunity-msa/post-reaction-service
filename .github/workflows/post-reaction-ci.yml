@@ -1,14 +1,14 @@
-name: 'Post-Reaction CI to Docker Hub'
+name: 'Post CI to Docker Hub'
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 env:
-  DOCKERHUB_REPO: 'uniunity/post-reaction-service'
+  DOCKERHUB_REPO: 'uniunity/post-service'
   K8S_REPO: 'https://github.com/Uniunity-msa/k8s.git'
-  SERVICE_DIR: 'post-reaction-service'
+  SERVICE_DIR: 'post-service'
 
 jobs:
   docker:
