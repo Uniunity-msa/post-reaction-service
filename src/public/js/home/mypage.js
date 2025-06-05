@@ -1,5 +1,6 @@
 const postServiceUrl = window.baseUrls.post;
 const userServiceUrl = window.baseUrls.user;
+const userServiceUrl2 = window.baseUrls.user2;
 const councilServiceUrl = window.baseUrls.council;
 const startServiceUrl = window.baseUrls.start;
 
@@ -106,7 +107,7 @@ const setLoginHeader = (res) => {
          
         loginStatusBtn.setAttribute("href", `${userServiceUrl}/login`);
         loginStatusBtn.innerText = "로그인";
-        signUpBtn.setAttribute("href", `${userServiceUrl}/agreement`);
+        signUpBtn.setAttribute("href", `${userServiceUrl2}/agreement`);
         signUpBtn.innerText = "회원가입";
     }
 };
@@ -122,13 +123,13 @@ const loadLinkData=()=>{
     const communityLink4= document.getElementById("community4_btn");
 
     nicknameLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/modify/nickname`; //user-service의 닉네임변경 화면 호출//
+        window.location.href = `${userServiceUrl2}/modify/nickname`; //user-service의 닉네임변경 화면 호출//
     });
     pswordLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/modify/password`; //user-service의 비밀번호변경 화면 호출//
+        window.location.href = `${userServiceUrl2}/modify/password`; //user-service의 비밀번호변경 화면 호출//
     });
     withdrawalLink.addEventListener("click", function () {
-        window.location.href = `${userServiceUrl}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
+        window.location.href = `${userServiceUrl2}/withdrawal`; //user-service의 회원탈퇴 화면 호출//
     });
     communityLink1.addEventListener("click", function () {
         const url = `${postServiceUrl}/mypage/community/post/1`; //post-service//
