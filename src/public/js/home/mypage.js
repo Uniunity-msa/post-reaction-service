@@ -41,9 +41,6 @@ const loadloginData = async () => {
 
         const data = await res.json();
 
-        //테스트용
-        console.log("[로그인 체크] 응답 데이터:", data);
-
         // 로그인 상태 및 유저정보 세팅
         setLoginHeader({
             loginStatus: true,
@@ -115,8 +112,6 @@ const setLoginHeader = (res) => {
 };
 
 const loadLinkData=()=>{
-
-    console.log("loadLinkData 실행됨");
     const nicknameLink = document.getElementById("nickname_modify_btn");
     const pswordLink = document.getElementById("psword_modify_btn");
     const withdrawalLink = document.getElementById("withdrawal_btn");
