@@ -1,4 +1,4 @@
-name: 'Post-Reaction CI to Docker Hub & Update K8s Manifest'
+name: 'Post-Reaction CI to Docker Hub'
 
 on:
   push:
@@ -12,14 +12,15 @@ env:
 
 jobs:
   docker:
-    name: 'Build, Push Docker & Update K8s'
+    name: 'Build and Push to Docker Hub'
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Source Repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set Image Tag (Datetime, Asia/Seoul)
+    - name: Set Image Tag (Datetime)
+      id: set-tag
       run: echo "IMAGE_TAG=$(TZ=Asia/Seoul date +'%Y%m%d%H%M')" >> $GITHUB_ENV
 
     - name: Docker Hub Login
@@ -34,23 +35,22 @@ jobs:
         docker build -t $IMAGE_URI .
         docker push $IMAGE_URI
 
-    - name: Checkout K8s Repo
-      uses: actions/checkout@v4
-      with:
-        repository: Uniunity-msa/k8s
-        token: ${{ secrets.K8S_REPO_TOKEN }}
-        path: k8s
-
-    - name: Update kustomization.yaml
+    - name: Install Kustomize
       run: |
-        cd k8s/${{ env.SERVICE_DIR }}
-        sed -i "s|image: ${{ env.DOCKERHUB_REPO }}:.*|image: ${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}|" kustomization.yaml
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin
 
-    - name: Commit and Push Changes
+    - name: Clone K8s Repository
+      run: |
+        git clone https://x-access-token:${{ secrets.K8S_REPO_TOKEN }}@github.com/Uniunity-msa/k8s.git
+        cd k8s/${{ env.SERVICE_DIR }}
+        kustomize edit set image ${{ env.DOCKERHUB_REPO }}=${{ env.DOCKERHUB_REPO }}:${{ env.IMAGE_TAG }}
+
+    - name: Commit and Push Image Tag Update
       run: |
         cd k8s
         git config user.name "github-actions"
         git config user.email "actions@github.com"
         git add .
-        git commit -m "Update image tag: $IMAGE_TAG"
-        git push
+        git commit -m "Update image tag: $IMAGE_TAG" || echo "Nothing to commit"
+        git push || echo "Nothing to push"
