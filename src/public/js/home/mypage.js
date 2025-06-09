@@ -41,7 +41,7 @@ const loadloginData = async () => {
         }
 
         const data = await res.json();
-
+        console.log("loadloginData 실행 : 로그인한 유저 정보 받아오기 => ", data);
         // 로그인 상태 및 유저정보 세팅
         setLoginHeader({
             loginStatus: true,
