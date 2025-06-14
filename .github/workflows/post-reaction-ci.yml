@@ -3,7 +3,7 @@ name: 'Post-Reaction CI to Docker Hub and K8s Repo'
 on:
   push:
     branches:
-      - main
+      - develop
 
 env:
   DOCKERHUB_REPO: 'uniunity/post-reaction-service'
